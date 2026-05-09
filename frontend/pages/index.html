@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PAU Housing System — Find Your Home Near Campus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">🏛</span>
+      <span class="nav-title">PAU Housing</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="properties.html">Properties</a></li>
+      <li><a href="landlords.html">Landlords</a></li>
+      <li><a href="login.html" class="btn-nav">Login</a></li>
+      <li><a href="register.html" class="btn-nav-outline">Sign Up</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </nav>
+
+  <!-- HERO SLIDESHOW -->
+  <section class="hero">
+    <div class="slideshow" id="slideshow">
+      <div class="slide active" style="background-image:url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80')"></div>
+      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1600&q=80')"></div>
+      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80')"></div>
+      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=1600&q=80')"></div>
+      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80')"></div>
+      <div class="slide-overlay"></div>
+    </div>
+    <div class="slide-dots" id="slideDots">
+      <span class="dot active" onclick="goToSlide(0)"></span>
+      <span class="dot" onclick="goToSlide(1)"></span>
+      <span class="dot" onclick="goToSlide(2)"></span>
+      <span class="dot" onclick="goToSlide(3)"></span>
+      <span class="dot" onclick="goToSlide(4)"></span>
+    </div>
+    <button class="slide-arrow left" onclick="changeSlide(-1)">&#8249;</button>
+    <button class="slide-arrow right" onclick="changeSlide(1)">&#8250;</button>
+
+    <div class="hero-content">
+      <div class="hero-badge">Pan-Atlantic University · Official Housing Portal</div>
+      <h1 class="hero-title">Find Your <em>Perfect Home</em><br/>Near Campus</h1>
+      <p class="hero-subtitle">Browse verified off-campus housing, connect with trusted landlords, and secure accommodation that fits your student life.</p>
+      <div class="search-box">
+        <div class="search-field">
+          <label>Name / Area</label>
+          <input type="text" placeholder="e.g. Beside PAU Gate..." id="searchName"/>
+        </div>
+        <div class="search-field">
+          <label>Room Type</label>
+          <select id="roomType">
+            <option value="">All Types</option>
+            <option value="single">Single Room</option>
+            <option value="shared">Shared Room</option>
+            <option value="self-contain">Self Contain</option>
+            <option value="flat">Flat</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label>Max Rent: <strong id="rentDisplay">₦500,000</strong>/yr</label>
+          <input type="range" id="maxRent" min="50000" max="1000000" step="10000" value="500000"
+            oninput="document.getElementById('rentDisplay').textContent='₦'+Number(this.value).toLocaleString()"/>
+        </div>
+        <button class="btn-search" onclick="searchProperties()">Search</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-banner">
+    <div class="stat"><span class="stat-num" id="countProperties">48</span><span class="stat-label">Properties Listed</span></div>
+    <div class="stat"><span class="stat-num" id="countLandlords">21</span><span class="stat-label">Verified Landlords</span></div>
+    <div class="stat"><span class="stat-num">3km</span><span class="stat-label">Max Distance Covered</span></div>
+    <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Verified Listings</span></div>
+  </section>
+
+  <!-- FEATURED PROPERTIES -->
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <p class="section-eyebrow">Browse Listings</p>
+        <h2>Featured Properties</h2>
+      </div>
+      <a href="properties.html" class="view-all">View All →</a>
+    </div>
+    <div class="properties-grid" id="featuredProperties"></div>
+  </section>
+
+  <!-- PHOTO STRIP -->
+  <section class="gallery-strip">
+    <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=500&q=80" alt="Apartment interior"/>
+    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80" alt="Student room"/>
+    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&q=80" alt="Kitchen"/>
+    <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500&q=80" alt="Living room"/>
+    <img src="https://images.unsplash.com/photo-1502005097973-6a7082348e28?w=500&q=80" alt="House exterior"/>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="section-inner">
+      <div class="section-header centered">
+        <p class="section-eyebrow">Simple Process</p>
+        <h2>How It Works</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card"><div class="step-num">01</div><div class="step-icon">🔍</div><h3>Search</h3><p>Filter listings by location, price and room type.</p></div>
+        <div class="step-card"><div class="step-num">02</div><div class="step-icon">📋</div><h3>Compare</h3><p>View full details, photos, distance from PAU and landlord info.</p></div>
+        <div class="step-card"><div class="step-num">03</div><div class="step-icon">💾</div><h3>Save</h3><p>Bookmark favourites to your Student Dashboard to revisit anytime.</p></div>
+        <div class="step-card"><div class="step-num">04</div><div class="step-icon">📞</div><h3>Connect</h3><p>Contact verified landlords directly and secure your home.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR STUDENTS / LANDLORDS -->
+  <section class="section two-col-section">
+    <div class="two-col-card">
+      <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=700&q=80" alt="Students studying"/>
+      <div class="two-col-body">
+        <span class="col-badge blue">For Students</span>
+        <h3>Find &amp; Save Your Perfect Room</h3>
+        <p>Create a free account, browse verified listings, save your favourites, and contact landlords — all from your personal dashboard.</p>
+        <a href="register.html?role=student" class="btn-primary">Register as Student</a>
+      </div>
+    </div>
+    <div class="two-col-card">
+      <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80" alt="Property owner"/>
+      <div class="two-col-body">
+        <span class="col-badge gold">For Property Owners</span>
+        <h3>List &amp; Manage Your Properties</h3>
+        <p>Register as a landlord, add your listings, manage inquiries, and connect with PAU students searching for housing near campus.</p>
+        <a href="register.html?role=landlord" class="btn-primary gold">Register as Landlord</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <div class="footer-logo">🏛 <span>PAU Housing</span></div>
+      <p>The official off-campus housing portal for Pan-Atlantic University.</p>
+    </div>
+    <div class="footer-col"><h4>Explore</h4><a href="properties.html">Properties</a><a href="landlords.html">Landlords</a></div>
+    <div class="footer-col"><h4>Account</h4><a href="login.html">Login</a><a href="register.html">Sign Up</a><a href="student-dashboard.html">Student Dashboard</a><a href="owner-dashboard.html">Owner Dashboard</a></div>
+    <div class="footer-col"><h4>Contact</h4><p>housing@pau.edu.ng</p><p>Ibeju-Lekki, Lagos</p></div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots   = document.querySelectorAll('.dot');
+    function goToSlide(n) {
+      slides[currentSlide].classList.remove('active');
+      dots[currentSlide].classList.remove('active');
+      currentSlide = (n + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+      dots[currentSlide].classList.add('active');
+    }
+    function changeSlide(dir) { goToSlide(currentSlide + dir); }
+    setInterval(() => changeSlide(1), 5000);
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+    });
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

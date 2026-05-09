@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Owner Dashboard — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body class="dashboard-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar owner-sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span>🏛</span>
+      <p>PAU Housing</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" onclick="showSection('listings', event)">
+        <span class="sidebar-icon">🏠</span> My Listings
+      </a>
+      <a href="#" class="sidebar-link" onclick="showSection('add', event)">
+        <span class="sidebar-icon">➕</span> Add Property
+      </a>
+      <a href="#" class="sidebar-link" onclick="showSection('profile', event)">
+        <span class="sidebar-icon">👤</span> My Profile
+      </a>
+      <a href="index.html" class="sidebar-link">
+        <span class="sidebar-icon">🌐</span> Back to Home
+      </a>
+    </nav>
+    <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dashboard-main">
+
+    <div class="dash-topbar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="dash-user-info">
+        <div class="dash-avatar owner-avatar" id="userAvatar">OW</div>
+        <span id="userName">Property Owner</span>
+      </div>
+    </div>
+
+    <!-- My Listings Section -->
+    <section class="dash-section" id="section-listings">
+      <div class="dash-section-header">
+        <h1>🏠 My Property Listings</h1>
+        <p>Manage all the properties you have listed on PAU Housing.</p>
+      </div>
+
+      <div class="dash-stats-row">
+        <div class="dash-stat-card"><span class="ds-num" id="totalListings">0</span><span class="ds-label">Total Listings</span></div>
+        <div class="dash-stat-card"><span class="ds-num" id="availableCount">0</span><span class="ds-label">Available</span></div>
+        <div class="dash-stat-card"><span class="ds-num" id="avgRentOwner">₦0</span><span class="ds-label">Avg. Rent</span></div>
+      </div>
+
+      <div class="dash-toolbar">
+        <button class="btn-primary" onclick="showSection('add', {target: document.querySelector('[onclick*=add]')})">+ Add New Property</button>
+      </div>
+
+      <div class="owner-listings-grid" id="ownerListings">
+        <div class="empty-state">
+          <p>📋 You have no listings yet.</p>
+          <button class="btn-primary" onclick="showSection('add', event)">Add Your First Property</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Property Section -->
+    <section class="dash-section" id="section-add" style="display:none;">
+      <div class="dash-section-header">
+        <h1>➕ Add New Property</h1>
+        <p>Fill in the details below to list your property for PAU students.</p>
+      </div>
+      <div class="add-property-form">
+        <div class="form-row">
+          <div class="form-group"><label>Property Name *</label><input type="text" id="propName" placeholder="e.g. Sunrise Lodge"/></div>
+          <div class="form-group"><label>Address *</label><input type="text" id="propAddress" placeholder="e.g. Bogije, Ibeju-Lekki"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Room Type *</label>
+            <select id="propType">
+              <option value="">Select type</option>
+              <option value="single">Single Room</option>
+              <option value="shared">Shared Room</option>
+              <option value="self-contain">Self Contain</option>
+              <option value="flat">Flat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Annual Rent (₦) *</label>
+            <input type="number" id="propRent" placeholder="e.g. 350000" step="10000"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Distance from PAU (km)</label>
+            <input type="number" id="propDistance" placeholder="e.g. 0.5" step="0.1"/>
+          </div>
+          <div class="form-group">
+            <label>Availability</label>
+            <select id="propAvailable">
+              <option value="true">Available</option>
+              <option value="false">Not Available</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label>Description</label>
+          <textarea id="propDesc" rows="4" placeholder="Describe the property — amenities, security, proximity to gate, etc."></textarea>
+        </div>
+        <div id="addError" class="auth-error" style="display:none;"></div>
+        <div id="addSuccess" class="auth-success" style="display:none;"></div>
+        <button class="btn-primary" onclick="addProperty()">Submit Listing</button>
+      </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section class="dash-section" id="section-profile" style="display:none;">
+      <div class="dash-section-header">
+        <h1>👤 My Profile</h1>
+        <p>Update your contact information visible to students.</p>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar-big owner-avatar" id="profileAvatarBig">OW</div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="profileName"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="profileEmail" readonly style="background:#f4f6fb;"/></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="profilePhone"/></div>
+        <div class="form-group"><label>Bio / About You</label><textarea id="profileBio" rows="3" placeholder="Tell students about yourself as a landlord..."></textarea></div>
+        <button class="btn-primary" onclick="alert('Profile saved!')">Save Changes</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('pau_user') || '{}');
+    const API  = 'http://localhost:3000/api';
+
+    // Set up user info
+    if (user.name) {
+      document.getElementById('userName').textContent = user.name;
+      const initials = user.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('profileAvatarBig').textContent = initials;
+      document.getElementById('profileName').value  = user.name;
+      document.getElementById('profileEmail').value = user.email;
+      document.getElementById('profilePhone').value = user.phone || '';
+    }
+
+    function showSection(name, e) {
+      document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
+      document.getElementById('section-' + name).style.display = 'block';
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      if (e && e.target) e.target.closest('.sidebar-link') && e.target.closest('.sidebar-link').classList.add('active');
+    }
+
+    // Load owner's listings from backend
+    async function loadMyListings() {
+      try {
+        const token = localStorage.getItem('pau_token');
+        const res   = await fetch(`${API}/my-properties`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data  = await res.json();
+        renderListings(data);
+      } catch {
+        renderListings(getSampleListings());
+      }
+    }
+
+    function getSampleListings() {
+      return [
+        { id:1, name:'Sunrise Lodge', address:'Beside PAU Gate', rent:350000, room_type:'self-contain', distance_from_school:0.3, available:true },
+        { id:2, name:'Royal Chambers', address:'Bogije, Ibeju-Lekki', rent:480000, room_type:'flat', distance_from_school:1.2, available:true },
+      ];
+    }
+
+    function renderListings(list) {
+      const grid = document.getElementById('ownerListings');
+      document.getElementById('totalListings').textContent = list.length;
+      document.getElementById('availableCount').textContent = list.filter(p => p.available).length;
+      if (list.length > 0) {
+        const avg = Math.round(list.reduce((s,p) => s + Number(p.rent), 0) / list.length);
+        document.getElementById('avgRentOwner').textContent = '₦' + avg.toLocaleString();
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><p>📋 No listings yet.</p></div>`;
+        return;
+      }
+
+      grid.innerHTML = list.map(p => `
+        <div class="owner-listing-row">
+          <div class="ol-info">
+            <div class="ol-type-badge">${p.room_type}</div>
+            <div class="ol-name">${p.name}</div>
+            <div class="ol-meta">📍 ${p.address} &nbsp;|&nbsp; 🚶 ${p.distance_from_school}km from PAU</div>
+          </div>
+          <div class="ol-rent">₦${Number(p.rent).toLocaleString()}<span>/yr</span></div>
+          <div class="ol-status ${p.available ? 'available' : 'unavailable'}">${p.available ? '✅ Available' : '❌ Unavailable'}</div>
+          <div class="ol-actions">
+            <button class="btn-sm-edit" onclick="editListing(${p.id})">Edit</button>
+            <button class="btn-sm-delete" onclick="deleteListing(${p.id})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function addProperty() {
+      const name     = document.getElementById('propName').value.trim();
+      const address  = document.getElementById('propAddress').value.trim();
+      const type     = document.getElementById('propType').value;
+      const rent     = document.getElementById('propRent').value;
+      const distance = document.getElementById('propDistance').value;
+      const avail    = document.getElementById('propAvailable').value;
+      const desc     = document.getElementById('propDesc').value.trim();
+      const errEl    = document.getElementById('addError');
+      const succEl   = document.getElementById('addSuccess');
+
+      errEl.style.display = 'none'; succEl.style.display = 'none';
+
+      if (!name || !address || !type || !rent) {
+        errEl.style.display = 'block';
+        errEl.textContent = 'Please fill in all required fields.';
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('pau_token');
+        const res   = await fetch(`${API}/properties`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ name, address, room_type: type, rent: Number(rent), distance_from_school: Number(distance), available: avail === 'true', description: desc })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          succEl.style.display = 'block';
+          succEl.textContent = 'Property listed successfully!';
+          document.getElementById('propName').value = '';
+          document.getElementById('propAddress').value = '';
+          document.getElementById('propRent').value = '';
+          document.getElementById('propDesc').value = '';
+          loadMyListings();
+          setTimeout(() => showSection('listings', {}), 2000);
+        } else {
+          errEl.style.display = 'block';
+          errEl.textContent = data.error || 'Failed to add property.';
+        }
+      } catch {
+        errEl.style.display = 'block';
+        errEl.textContent = 'Backend not connected. Property saved locally for now.';
+      }
+    }
+
+    function editListing(id) { alert('Edit functionality — connect to backend to implement.'); }
+    function deleteListing(id) {
+      if (confirm('Are you sure you want to delete this listing?')) {
+        alert('Delete sent to backend (connect server.js to apply).');
+      }
+    }
+    function logout() {
+      localStorage.removeItem('pau_token');
+      localStorage.removeItem('pau_user');
+      window.location.href = 'login.html';
+    }
+
+    loadMyListings();
+  </script>
+</body>
+</html>

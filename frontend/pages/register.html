@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+  <div class="auth-page">
+    <!-- Left image panel -->
+    <div class="auth-image-panel">
+      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80" alt="House"/>
+      <div class="auth-image-overlay">
+        <a href="index.html" class="auth-back">← Back to Home</a>
+        <div class="auth-image-text">
+          <h2>Join PAU Housing</h2>
+          <p>Create your account to start browsing verified listings or list your property for students.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-form-panel">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <span>🏛</span>
+          <p>PAU Housing System</p>
+        </div>
+
+        <!-- Role Tabs -->
+        <div class="role-tabs">
+          <button class="role-tab active" id="tabStudent" onclick="switchRole('student')">
+            🎓 Student Sign Up
+          </button>
+          <button class="role-tab" id="tabLandlord" onclick="switchRole('landlord')">
+            🏠 Owner Sign Up
+          </button>
+        </div>
+
+        <div id="roleLabel" class="role-label">Registering as a <strong>Student</strong></div>
+        <input type="hidden" id="userRole" value="student"/>
+
+        <div id="errorMsg" class="auth-error" style="display:none;"></div>
+        <div id="successMsg" class="auth-success" style="display:none;"></div>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="fullName" placeholder="e.g. Nasaa Ahmadu"/>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="e.g. name@pau.edu.ng"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="e.g. 08012345678"/>
+        </div>
+
+        <!-- Extra field shown for landlords -->
+        <div class="form-group" id="addressGroup" style="display:none;">
+          <label>Property Address / Area</label>
+          <input type="text" id="address" placeholder="e.g. Bogije, Ibeju-Lekki"/>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Create a password"/>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Repeat your password"/>
+        </div>
+
+        <button class="btn-auth" onclick="handleRegister()">Create Account</button>
+
+        <p class="auth-switch">
+          Already have an account? <a href="login.html">Sign in here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Pre-select role from URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    const preRole   = urlParams.get('role');
+    if (preRole === 'landlord') switchRole('landlord');
+
+    function switchRole(role) {
+      document.getElementById('userRole').value = role;
+      document.getElementById('tabStudent').classList.toggle('active', role === 'student');
+      document.getElementById('tabLandlord').classList.toggle('active', role === 'landlord');
+      const label = document.getElementById('roleLabel');
+      const addrGrp = document.getElementById('addressGroup');
+      if (role === 'student') {
+        label.innerHTML = 'Registering as a <strong>Student</strong>';
+        addrGrp.style.display = 'none';
+      } else {
+        label.innerHTML = 'Registering as a <strong>Property Owner</strong>';
+        addrGrp.style.display = 'block';
+      }
+    }
+
+    async function handleRegister() {
+      const name     = document.getElementById('fullName').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const phone    = document.getElementById('phone').value.trim();
+      const address  = document.getElementById('address').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirmPassword').value;
+      const role     = document.getElementById('userRole').value;
+      const errorMsg = document.getElementById('errorMsg');
+      const successMsg = document.getElementById('successMsg');
+
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'none';
+
+      if (!name || !email || !password) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'Please fill in all required fields.';
+        return;
+      }
+      if (password !== confirm) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'Passwords do not match.';
+        return;
+      }
+      if (password.length < 6) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'Password must be at least 6 characters.';
+        return;
+      }
+
+      try {
+        const res  = await fetch('http://localhost:3000/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, address, password, role })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          successMsg.style.display = 'block';
+          successMsg.textContent = 'Account created successfully! Redirecting to login...';
+          setTimeout(() => window.location.href = 'login.html', 2000);
+        } else {
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = data.error || 'Registration failed. Please try again.';
+        }
+      } catch (err) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'Cannot connect to server. Make sure the backend is running.';
+      }
+    }
+  </script>
+</body>
+</html>

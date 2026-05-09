@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body class="dashboard-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span>🏛</span>
+      <p>PAU Housing</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" onclick="showSection('saved')">
+        <span class="sidebar-icon">💾</span> Saved Properties
+      </a>
+      <a href="#" class="sidebar-link" onclick="showSection('profile')">
+        <span class="sidebar-icon">👤</span> My Profile
+      </a>
+      <a href="properties.html" class="sidebar-link">
+        <span class="sidebar-icon">🔍</span> Browse Properties
+      </a>
+      <a href="index.html" class="sidebar-link">
+        <span class="sidebar-icon">🏠</span> Back to Home
+      </a>
+    </nav>
+    <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="dashboard-main">
+
+    <!-- Top bar -->
+    <div class="dash-topbar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="dash-user-info">
+        <div class="dash-avatar" id="userAvatar">ST</div>
+        <span id="userName">Student</span>
+      </div>
+    </div>
+
+    <!-- Saved Properties Section -->
+    <section class="dash-section" id="section-saved">
+      <div class="dash-section-header">
+        <h1>💾 Saved Properties</h1>
+        <p>These are the listings you have bookmarked while browsing.</p>
+      </div>
+
+      <div class="dash-stats-row">
+        <div class="dash-stat-card"><span class="ds-num" id="savedCount">0</span><span class="ds-label">Saved Listings</span></div>
+        <div class="dash-stat-card"><span class="ds-num" id="avgRent">₦0</span><span class="ds-label">Avg. Rent Saved</span></div>
+      </div>
+
+      <div class="properties-grid" id="savedGrid">
+        <div class="empty-state">
+          <p>📭 You haven't saved any properties yet.</p>
+          <a href="properties.html" class="btn-primary">Browse Properties</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section class="dash-section" id="section-profile" style="display:none;">
+      <div class="dash-section-header">
+        <h1>👤 My Profile</h1>
+        <p>Update your personal information below.</p>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar-big" id="profileAvatarBig">ST</div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="profileName" placeholder="Your full name"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="profileEmail" placeholder="Your email" readonly style="background:#f4f6fb;"/></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="profilePhone" placeholder="Your phone number"/></div>
+        <div class="form-group"><label>New Password (leave blank to keep current)</label><input type="password" id="profilePass" placeholder="New password"/></div>
+        <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Load user info
+    const user = JSON.parse(localStorage.getItem('pau_user') || '{}');
+    if (user.name) {
+      document.getElementById('userName').textContent = user.name;
+      const initials = user.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('profileAvatarBig').textContent = initials;
+      document.getElementById('profileName').value  = user.name;
+      document.getElementById('profileEmail').value = user.email;
+      document.getElementById('profilePhone').value = user.phone || '';
+    }
+
+    // Show/hide sections
+    function showSection(name) {
+      document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
+      document.getElementById('section-' + name).style.display = 'block';
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      event.target.closest('.sidebar-link').classList.add('active');
+    }
+
+    // Load saved properties from localStorage
+    function loadSaved() {
+      const saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
+      const grid  = document.getElementById('savedGrid');
+      document.getElementById('savedCount').textContent = saved.length;
+
+      if (saved.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><p>📭 No saved properties yet.</p><a href="properties.html" class="btn-primary">Browse Properties</a></div>`;
+        return;
+      }
+
+      const avgRent = Math.round(saved.reduce((s,p) => s + Number(p.rent), 0) / saved.length);
+      document.getElementById('avgRent').textContent = '₦' + avgRent.toLocaleString();
+
+      grid.innerHTML = saved.map(p => `
+        <div class="property-card">
+          <div class="property-img-wrap">
+            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&q=70" alt="${p.name}" onerror="this.style.display='none'"/>
+          </div>
+          <div class="property-body">
+            <span class="property-badge">${p.room_type || 'Room'}</span>
+            <p class="property-name">${p.name}</p>
+            <p class="property-meta">📍 ${p.address} &nbsp;|&nbsp; 🚶 ${p.distance_from_school || '?'}km</p>
+            <div class="property-footer">
+              <div class="property-price">₦${Number(p.rent).toLocaleString()} <span>/yr</span></div>
+              <button class="btn-remove" onclick="removeSaved(${p.id})">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function removeSaved(id) {
+      let saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
+      saved = saved.filter(p => p.id !== id);
+      localStorage.setItem('pau_saved', JSON.stringify(saved));
+      loadSaved();
+    }
+
+    function saveProfile() {
+      alert('Profile updated! (Connect to backend to persist changes.)');
+    }
+
+    function logout() {
+      localStorage.removeItem('pau_token');
+      localStorage.removeItem('pau_user');
+      window.location.href = 'login.html';
+    }
+
+    loadSaved();
+  </script>
+</body>
+</html>

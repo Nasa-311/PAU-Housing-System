@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Properties — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <nav class="navbar scrolled" id="navbar">
+    <div class="nav-brand"><span class="nav-logo">🏛</span><span class="nav-title">PAU Housing</span></div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="properties.html" class="active">Properties</a></li>
+      <li><a href="landlords.html">Landlords</a></li>
+      <li><a href="login.html" class="btn-nav">Login</a></li>
+      <li><a href="register.html" class="btn-nav-outline">Sign Up</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </nav>
+
+  <div class="page-hero-mini">
+    <h1>Browse Properties</h1>
+    <p>Find verified off-campus housing near Pan-Atlantic University</p>
+  </div>
+
+  <div class="properties-page-layout">
+    <!-- Filters Sidebar -->
+    <aside class="filter-sidebar">
+      <h3>Filter Listings</h3>
+      <div class="filter-group">
+        <label>Search by Name</label>
+        <input type="text" id="filterName" placeholder="Property name..."/>
+      </div>
+      <div class="filter-group">
+        <label>Room Type</label>
+        <select id="filterType">
+          <option value="">All Types</option>
+          <option value="single">Single Room</option>
+          <option value="shared">Shared Room</option>
+          <option value="self-contain">Self Contain</option>
+          <option value="flat">Flat</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Max Rent: <strong id="filterRentDisplay">₦1,000,000</strong>/yr</label>
+        <input type="range" id="filterRent" min="50000" max="1000000" step="10000" value="1000000"
+          oninput="document.getElementById('filterRentDisplay').textContent='₦'+Number(this.value).toLocaleString()"/>
+      </div>
+      <div class="filter-group">
+        <label>Max Distance from PAU</label>
+        <select id="filterDist">
+          <option value="">Any Distance</option>
+          <option value="0.5">Within 0.5km</option>
+          <option value="1">Within 1km</option>
+          <option value="2">Within 2km</option>
+          <option value="3">Within 3km</option>
+        </select>
+      </div>
+      <button class="btn-primary filter-btn" onclick="applyFilters()">Apply Filters</button>
+      <button class="btn-outline filter-btn" onclick="clearFilters()">Clear Filters</button>
+    </aside>
+
+    <!-- Results -->
+    <div class="properties-results">
+      <div class="results-header">
+        <span id="resultsCount">Loading...</span>
+        <select id="sortBy" onchange="applyFilters()">
+          <option value="newest">Newest First</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="distance">Closest to PAU</option>
+        </select>
+      </div>
+      <div class="properties-grid" id="propertiesGrid">
+        <p class="loading-text">Loading properties...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // Pre-fill from URL params (from homepage search)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('name'))      document.getElementById('filterName').value = params.get('name');
+    if (params.get('room_type')) document.getElementById('filterType').value = params.get('room_type');
+    if (params.get('max_rent'))  { document.getElementById('filterRent').value = params.get('max_rent'); document.getElementById('filterRentDisplay').textContent = '₦' + Number(params.get('max_rent')).toLocaleString(); }
+
+    const IMAGES = [
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&q=70',
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=70',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=70',
+      'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=400&q=70',
+    ];
+
+    async function applyFilters() {
+      const name     = document.getElementById('filterName').value;
+      const type     = document.getElementById('filterType').value;
+      const maxRent  = document.getElementById('filterRent').value;
+      const maxDist  = document.getElementById('filterDist').value;
+      const sortBy   = document.getElementById('sortBy').value;
+      const grid     = document.getElementById('propertiesGrid');
+
+      grid.innerHTML = '<p class="loading-text">Searching...</p>';
+
+      try {
+        const qp = new URLSearchParams();
+        if (name)    qp.append('name', name);
+        if (type)    qp.append('room_type', type);
+        if (maxRent) qp.append('max_rent', maxRent);
+
+        const res  = await fetch(`http://localhost:3000/api/properties?${qp}`);
+        let data   = await res.json();
+
+        if (maxDist) data = data.filter(p => p.distance_from_school <= Number(maxDist));
+        if (sortBy === 'price_asc')  data.sort((a,b) => a.rent - b.rent);
+        if (sortBy === 'price_desc') data.sort((a,b) => b.rent - a.rent);
+        if (sortBy === 'distance')   data.sort((a,b) => a.distance_from_school - b.distance_from_school);
+
+        renderProperties(data);
+      } catch {
+        renderProperties(getSampleData());
+      }
+    }
+
+    function getSampleData() {
+      return [
+        { id:1, name:'Sunrise Lodge', address:'Beside PAU Gate', rent:350000, room_type:'self-contain', distance_from_school:0.3 },
+        { id:2, name:'Grace Apartment', address:'Abraham Adesanya', rent:280000, room_type:'shared', distance_from_school:0.8 },
+        { id:3, name:'Royal Chambers', address:'Bogije, Ibeju-Lekki', rent:480000, room_type:'flat', distance_from_school:1.2 },
+        { id:4, name:'Palm View Hostel', address:'Lakowe Estate', rent:220000, room_type:'single', distance_from_school:2.0 },
+        { id:5, name:'Lekki Gardens', address:'Ibeju-Lekki', rent:400000, room_type:'self-contain', distance_from_school:0.6 },
+        { id:6, name:'Blue Crest Rooms', address:'Ajah', rent:310000, room_type:'shared', distance_from_school:1.5 },
+      ];
+    }
+
+    function renderProperties(data) {
+      const grid = document.getElementById('propertiesGrid');
+      document.getElementById('resultsCount').textContent = `${data.length} propert${data.length === 1 ? 'y' : 'ies'} found`;
+      if (data.length === 0) { grid.innerHTML = '<p class="loading-text">No properties match your filters.</p>'; return; }
+      grid.innerHTML = data.map((p, i) => `
+        <div class="property-card" onclick="window.location.href='property-detail.html?id=${p.id}'">
+          <div class="property-img-wrap">
+            <img src="${IMAGES[i % IMAGES.length]}" alt="${p.name}"/>
+            <button class="save-btn" title="Save Property" onclick="event.stopPropagation(); saveProperty(${JSON.stringify(p).replace(/"/g,'&quot;')})">♡</button>
+          </div>
+          <div class="property-body">
+            <span class="property-badge">${p.room_type}</span>
+            <p class="property-name">${p.name}</p>
+            <p class="property-meta">📍 ${p.address} &nbsp;|&nbsp; 🚶 ${p.distance_from_school}km from PAU</p>
+            <div class="property-footer">
+              <div class="property-price">₦${Number(p.rent).toLocaleString()} <span>/yr</span></div>
+              <a class="btn-details" href="property-detail.html?id=${p.id}">View Details</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function saveProperty(p) {
+      let saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
+      if (saved.find(s => s.id === p.id)) { alert('Already saved!'); return; }
+      saved.push(p);
+      localStorage.setItem('pau_saved', JSON.stringify(saved));
+      alert('Property saved to your dashboard! ✅');
+    }
+
+    function clearFilters() {
+      document.getElementById('filterName').value = '';
+      document.getElementById('filterType').value = '';
+      document.getElementById('filterRent').value = 1000000;
+      document.getElementById('filterRentDisplay').textContent = '₦1,000,000';
+      document.getElementById('filterDist').value = '';
+      applyFilters();
+    }
+
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    applyFilters();
+  </script>
+</body>
+</html>
