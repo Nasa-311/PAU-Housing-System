@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PAU Housing System — Find Your Home Near Campus</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="../js/accessibility.js"></script>
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <span class="nav-logo">🏛</span>
@@ -26,17 +26,17 @@
     <button class="hamburger" id="hamburger">&#9776;</button>
   </nav>
 
-  <!-- HERO SLIDESHOW -->
+  <!-- HERO SLIDESHOW — using local images -->
   <section class="hero">
-    <div class="slideshow" id="slideshow">
-      <div class="slide active" style="background-image:url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80')"></div>
-      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1600&q=80')"></div>
-      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80')"></div>
-      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=1600&q=80')"></div>
-      <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80')"></div>
+    <div class="slideshow">
+      <div class="slide active" style="background-image:url('../images/hero1.jpg')"></div>
+      <div class="slide" style="background-image:url('../images/hero2.jpg')"></div>
+      <div class="slide" style="background-image:url('../images/hero3.jpg')"></div>
+      <div class="slide" style="background-image:url('../images/hero4.jpg')"></div>
+      <div class="slide" style="background-image:url('../images/hero5.jpg')"></div>
       <div class="slide-overlay"></div>
     </div>
-    <div class="slide-dots" id="slideDots">
+    <div class="slide-dots">
       <span class="dot active" onclick="goToSlide(0)"></span>
       <span class="dot" onclick="goToSlide(1)"></span>
       <span class="dot" onclick="goToSlide(2)"></span>
@@ -66,9 +66,9 @@
           </select>
         </div>
         <div class="search-field">
-          <label>Max Rent: <strong id="rentDisplay">₦500,000</strong>/yr</label>
+          <label>Max Rent: <strong id="rentDisplay">&#8358;500,000</strong>/yr</label>
           <input type="range" id="maxRent" min="50000" max="1000000" step="10000" value="500000"
-            oninput="document.getElementById('rentDisplay').textContent='₦'+Number(this.value).toLocaleString()"/>
+            oninput="document.getElementById('rentDisplay').textContent='&#8358;'+Number(this.value).toLocaleString()"/>
         </div>
         <button class="btn-search" onclick="searchProperties()">Search</button>
       </div>
@@ -79,7 +79,7 @@
   <section class="stats-banner">
     <div class="stat"><span class="stat-num" id="countProperties">48</span><span class="stat-label">Properties Listed</span></div>
     <div class="stat"><span class="stat-num" id="countLandlords">21</span><span class="stat-label">Verified Landlords</span></div>
-    <div class="stat"><span class="stat-num">3km</span><span class="stat-label">Max Distance Covered</span></div>
+    <div class="stat"><span class="stat-num">3km</span><span class="stat-label">Max Distance</span></div>
     <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Verified Listings</span></div>
   </section>
 
@@ -90,18 +90,18 @@
         <p class="section-eyebrow">Browse Listings</p>
         <h2>Featured Properties</h2>
       </div>
-      <a href="properties.html" class="view-all">View All →</a>
+      <a href="#" class="view-all" onclick="event.preventDefault();requireLogin()">View All &#8594;</a>
     </div>
     <div class="properties-grid" id="featuredProperties"></div>
   </section>
 
-  <!-- PHOTO STRIP -->
+  <!-- GALLERY STRIP — local images -->
   <section class="gallery-strip">
-    <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=500&q=80" alt="Apartment interior"/>
-    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80" alt="Student room"/>
-    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&q=80" alt="Kitchen"/>
-    <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500&q=80" alt="Living room"/>
-    <img src="https://images.unsplash.com/photo-1502005097973-6a7082348e28?w=500&q=80" alt="House exterior"/>
+    <img src="../images/gallery1.jpg" alt="Apartment interior"/>
+    <img src="../images/gallery2.jpg" alt="Living room"/>
+    <img src="../images/gallery3.jpg" alt="Bedroom"/>
+    <img src="../images/gallery4.jpg" alt="Kitchen"/>
+    <img src="../images/gallery5.jpg" alt="House exterior"/>
   </section>
 
   <!-- HOW IT WORKS -->
@@ -112,31 +112,31 @@
         <h2>How It Works</h2>
       </div>
       <div class="steps-grid">
-        <div class="step-card"><div class="step-num">01</div><div class="step-icon">🔍</div><h3>Search</h3><p>Filter listings by location, price and room type.</p></div>
-        <div class="step-card"><div class="step-num">02</div><div class="step-icon">📋</div><h3>Compare</h3><p>View full details, photos, distance from PAU and landlord info.</p></div>
-        <div class="step-card"><div class="step-num">03</div><div class="step-icon">💾</div><h3>Save</h3><p>Bookmark favourites to your Student Dashboard to revisit anytime.</p></div>
-        <div class="step-card"><div class="step-num">04</div><div class="step-icon">📞</div><h3>Connect</h3><p>Contact verified landlords directly and secure your home.</p></div>
+        <div class="step-card"><div class="step-num">01</div><div class="step-icon">&#128269;</div><h3>Search</h3><p>Filter listings by location, price and room type to find what fits your budget.</p></div>
+        <div class="step-card"><div class="step-num">02</div><div class="step-icon">&#128203;</div><h3>Compare</h3><p>View full details, distance from PAU and landlord info before deciding.</p></div>
+        <div class="step-card"><div class="step-num">03</div><div class="step-icon">&#128190;</div><h3>Save</h3><p>Bookmark favourites to your Student Dashboard to revisit anytime.</p></div>
+        <div class="step-card"><div class="step-num">04</div><div class="step-icon">&#128222;</div><h3>Connect</h3><p>Contact verified landlords directly and secure your accommodation.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- FOR STUDENTS / LANDLORDS -->
+  <!-- FOR STUDENTS / LANDLORDS — local images -->
   <section class="section two-col-section">
     <div class="two-col-card">
-      <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=700&q=80" alt="Students studying"/>
+      <img src="../images/students.jpg" alt="Students"/>
       <div class="two-col-body">
         <span class="col-badge blue">For Students</span>
         <h3>Find &amp; Save Your Perfect Room</h3>
-        <p>Create a free account, browse verified listings, save your favourites, and contact landlords — all from your personal dashboard.</p>
+        <p>Create a free account, browse verified listings near PAU, save your favourites, and contact landlords from your dashboard.</p>
         <a href="register.html?role=student" class="btn-primary">Register as Student</a>
       </div>
     </div>
     <div class="two-col-card">
-      <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=700&q=80" alt="Property owner"/>
+      <img src="../images/property-owner.jpg" alt="Property owner"/>
       <div class="two-col-body">
         <span class="col-badge gold">For Property Owners</span>
         <h3>List &amp; Manage Your Properties</h3>
-        <p>Register as a landlord, add your listings, manage inquiries, and connect with PAU students searching for housing near campus.</p>
+        <p>Register as a landlord, add your listings with photos, and connect with PAU students searching for housing near campus.</p>
         <a href="register.html?role=landlord" class="btn-primary gold">Register as Landlord</a>
       </div>
     </div>
@@ -145,7 +145,7 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-brand">
-      <div class="footer-logo">🏛 <span>PAU Housing</span></div>
+      <div class="footer-logo">&#127963; <span>PAU Housing</span></div>
       <p>The official off-campus housing portal for Pan-Atlantic University.</p>
     </div>
     <div class="footer-col"><h4>Explore</h4><a href="properties.html">Properties</a><a href="landlords.html">Landlords</a></div>
@@ -153,26 +153,45 @@
     <div class="footer-col"><h4>Contact</h4><p>housing@pau.edu.ng</p><p>Ibeju-Lekki, Lagos</p></div>
   </footer>
 
+  <!-- AUTH GUARD -->
+  <div class="auth-guard-overlay" id="authGuard">
+    <div class="auth-guard-box">
+      <div class="guard-icon">&#128274;</div>
+      <h2>Sign In Required</h2>
+      <p>You need to be logged in to browse all property listings.</p>
+      <div class="auth-guard-buttons">
+        <a href="login.html" class="btn-primary">Sign In</a>
+        <a href="register.html" class="btn-outline">Sign Up Free</a>
+      </div>
+      <br/>
+      <button class="btn-guard-close" onclick="document.getElementById('authGuard').style.display='none';document.body.style.overflow=''">Maybe later</button>
+    </div>
+  </div>
+
   <script src="../js/main.js"></script>
   <script>
-    let currentSlide = 0;
+    let cur = 0;
     const slides = document.querySelectorAll('.slide');
     const dots   = document.querySelectorAll('.dot');
     function goToSlide(n) {
-      slides[currentSlide].classList.remove('active');
-      dots[currentSlide].classList.remove('active');
-      currentSlide = (n + slides.length) % slides.length;
-      slides[currentSlide].classList.add('active');
-      dots[currentSlide].classList.add('active');
+      slides[cur].classList.remove('active'); dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active'); dots[cur].classList.add('active');
     }
-    function changeSlide(dir) { goToSlide(currentSlide + dir); }
+    function changeSlide(d) { goToSlide(cur + d); }
     setInterval(() => changeSlide(1), 5000);
+
     window.addEventListener('scroll', () => {
       document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
     });
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('open');
     });
+    function requireLogin() {
+      const token = localStorage.getItem('pau_token');
+      if (token) window.location.href = 'properties.html';
+      else { document.getElementById('authGuard').style.display='flex'; document.body.style.overflow='hidden'; }
+    }
   </script>
 </body>
 </html>

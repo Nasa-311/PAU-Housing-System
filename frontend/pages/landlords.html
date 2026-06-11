@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landlords — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+  <nav class="navbar solid" id="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">🏛</span>
+      <span class="nav-title">PAU Housing</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="properties.html">Properties</a></li>
+      <li><a href="landlords.html" class="active">Landlords</a></li>
+      <li><a href="login.html" class="btn-nav">Login</a></li>
+      <li><a href="register.html" class="btn-nav-outline">Sign Up</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </nav>
+
+  <div class="page-hero-mini">
+    <h1>Our Verified Landlords</h1>
+    <p>Meet the trusted property owners listing accommodation for PAU students</p>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div style="background:white; padding:20px 5%; border-bottom:1px solid var(--pau-border);">
+    <div style="max-width:500px; margin:0 auto; display:flex; gap:10px;">
+      <input type="text" id="landlordSearch" placeholder="Search by name or area..."
+        oninput="filterLandlords()"
+        style="flex:1; border:1.5px solid var(--pau-border); border-radius:6px; padding:10px 14px;
+               font-family:'DM Sans',sans-serif; font-size:14px; outline:none;
+               background:var(--pau-white); color:var(--pau-text);"/>
+    </div>
+  </div>
+
+  <div style="max-width:1100px; margin:0 auto; padding:40px 5%;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:10px;">
+      <div>
+        <p class="section-eyebrow">Property Owners</p>
+        <h2 style="font-family:'Playfair Display',serif; font-size:28px;">All Landlords</h2>
+      </div>
+      <span id="landlordCount" style="font-size:14px; color:var(--pau-gray);"></span>
+    </div>
+    <div class="landlords-grid" id="landlordsGrid">
+      <p class="loading-text">Loading landlords...</p>
+    </div>
+  </div>
+
+  <!-- LANDLORD DETAIL MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-brand">
+      <div class="footer-logo">🏛 <span>PAU Housing</span></div>
+      <p>The official off-campus housing portal for Pan-Atlantic University.</p>
+    </div>
+    <div class="footer-col"><h4>Explore</h4><a href="properties.html">Properties</a><a href="landlords.html">Landlords</a></div>
+    <div class="footer-col"><h4>Account</h4><a href="login.html">Login</a><a href="register.html">Sign Up</a></div>
+    <div class="footer-col"><h4>Contact</h4><p>housing@pau.edu.ng</p><p>Ibeju-Lekki, Lagos</p></div>
+  </footer>
+
+  <script src="../js/accessibility.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    const API = 'http://localhost:3000/api';
+
+    // Sample data shown when backend is offline
+    const SAMPLE_LANDLORDS = [
+      { id:1, name:'Mr. Adebayo Johnson',  phone:'08012345678', email:'adebayo@example.com',  address:'Bogije, Ibeju-Lekki',           bio:'Experienced landlord with multiple properties near PAU. 24/7 security and constant water supply.',              properties_count:3, icon:'👨‍💼' },
+      { id:2, name:'Mrs. Chioma Okafor',   phone:'08098765432', email:'chioma@example.com',   address:'Abraham Adesanya Estate, Ajah', bio:'Friendly landlord providing affordable accommodation for PAU students. Kitchen and bathroom in every unit.',        properties_count:2, icon:'👩‍💼' },
+      { id:3, name:'Mr. Emeka Nwachukwu',  phone:'08056781234', email:'emeka@example.com',    address:'Lakowe Estate, Ibeju-Lekki',    bio:'Self-contain and flat options very close to PAU gate. Constant water supply and clean environment.',               properties_count:4, icon:'👨‍💼' },
+      { id:4, name:'Mrs. Folake Adeleke',  phone:'08134567890', email:'folake@example.com',   address:'Ibeju-Lekki Town',              bio:'Clean, secure and affordable rooms for PAU students. Flexible payment options. Generator backup available.',       properties_count:2, icon:'👩‍💼' },
+      { id:5, name:'Mr. Tunde Balogun',    phone:'08023456789', email:'tunde@example.com',    address:'Elerangbe, Ibeju-Lekki',        bio:'Modern apartments with good ventilation. 5 minutes drive from PAU campus. CCTV security cameras installed.',      properties_count:5, icon:'👨‍💼' },
+      { id:6, name:'Mrs. Ngozi Eze',       phone:'08145678901', email:'ngozi@example.com',    address:'Akodo, Ibeju-Lekki',            bio:'Affordable student accommodation near PAU main road. Generator backup, borehole water and secure gated compound.', properties_count:3, icon:'👩‍💼' },
+    ];
+
+    const ICONS = ['👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼'];
+    let ALL_LANDLORDS = [];
+
+    // ---- Load from backend first, fallback to sample ----
+    async function loadLandlords() {
+      try {
+        const res  = await fetch(`${API}/landlords`);
+        const data = await res.json();
+        // Merge with icons
+        ALL_LANDLORDS = data.map((l, i) => ({
+          ...l,
+          icon: ICONS[i % ICONS.length],
+          properties_count: Number(l.properties_count) || 0
+        }));
+        if (ALL_LANDLORDS.length === 0) ALL_LANDLORDS = SAMPLE_LANDLORDS;
+      } catch {
+        ALL_LANDLORDS = SAMPLE_LANDLORDS;
+      }
+      renderLandlords(ALL_LANDLORDS);
+    }
+
+    function renderLandlords(list) {
+      const grid = document.getElementById('landlordsGrid');
+      document.getElementById('landlordCount').textContent =
+        `${list.length} landlord${list.length !== 1 ? 's' : ''} registered`;
+
+      if (!list.length) {
+        grid.innerHTML = '<p class="loading-text">No landlords found.</p>';
+        return;
+      }
+
+      grid.innerHTML = list.map((l, i) => `
+        <div class="landlord-card" onclick="openLandlord(${l.id})">
+          <div class="landlord-avatar">${l.icon || ICONS[i % ICONS.length]}</div>
+          <div class="landlord-info">
+            <h3 class="landlord-name">${l.name}</h3>
+            <p class="landlord-address">📍 ${l.address || 'Ibeju-Lekki, Lagos'}</p>
+            <p class="landlord-bio">${(l.bio || 'Verified property owner near PAU campus.').substring(0, 90)}...</p>
+            <div class="landlord-footer">
+              <span class="landlord-props">🏠 ${l.properties_count || 0} Propert${Number(l.properties_count) === 1 ? 'y' : 'ies'}</span>
+              <button class="btn-details">View Profile</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterLandlords() {
+      const q = document.getElementById('landlordSearch').value.toLowerCase();
+      renderLandlords(
+        ALL_LANDLORDS.filter(l =>
+          l.name.toLowerCase().includes(q) ||
+          (l.address || '').toLowerCase().includes(q)
+        )
+      );
+    }
+
+    function openLandlord(id) {
+      const l = ALL_LANDLORDS.find(x => x.id === id);
+      if (!l) return;
+
+      const user  = JSON.parse(localStorage.getItem('pau_user') || 'null');
+      const token = localStorage.getItem('pau_token');
+
+      const contactInfo = token && user
+        ? `<div class="detail-contact-item">📞 <span>${l.phone || 'Not provided'}</span></div>
+           <div class="detail-contact-item">✉️ <span>${l.email || 'Not provided'}</span></div>`
+        : `<div style="background:#fff8ec;border:1px solid #f5a623;border-radius:8px;padding:14px;font-size:13px;color:#7a5000;margin-bottom:8px;">
+             🔒 <strong>Sign in to view contact details</strong><br/>
+             <a href="login.html" style="color:var(--pau-blue);font-weight:600;">Login here</a> or
+             <a href="register.html" style="color:var(--pau-blue);font-weight:600;">create a free account</a>.
+           </div>`;
+
+      // Properties link — filters properties page by landlord id
+      const propsUrl  = `properties.html?landlord_id=${l.id}&landlord_name=${encodeURIComponent(l.name)}`;
+      const propsText = l.properties_count > 0
+        ? `View ${l.properties_count} Propert${Number(l.properties_count) === 1 ? 'y' : 'ies'}`
+        : 'View Properties';
+
+      document.getElementById('modalContent').innerHTML = `
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="font-size:64px;margin-bottom:12px;">${l.icon || '👨‍💼'}</div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--pau-text);margin-bottom:6px;">${l.name}</h2>
+          <p style="color:var(--pau-gray);font-size:14px;">📍 ${l.address || 'Ibeju-Lekki, Lagos'}</p>
+          <span style="background:#d1fae5;color:#065f46;font-size:12px;font-weight:600;padding:4px 12px;border-radius:100px;display:inline-block;margin-top:8px;">✅ Verified Landlord</span>
+        </div>
+
+        <div style="background:var(--pau-light-bg);border-radius:10px;padding:18px;margin-bottom:20px;">
+          <p style="font-size:14px;color:var(--pau-muted);line-height:1.8;">${l.bio || 'Verified property owner near PAU campus providing quality student accommodation.'}</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div style="background:#eef2ff;border-radius:8px;padding:16px;text-align:center;">
+            <div style="font-size:26px;font-weight:700;color:var(--pau-blue);">${l.properties_count || 0}</div>
+            <div style="font-size:12px;color:var(--pau-gray);">Properties Listed</div>
+          </div>
+          <div style="background:#eef2ff;border-radius:8px;padding:16px;text-align:center;">
+            <div style="font-size:26px;font-weight:700;color:var(--pau-blue);">✅</div>
+            <div style="font-size:12px;color:var(--pau-gray);">Verified</div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--pau-border);padding-top:20px;">
+          <h4 style="font-size:13px;font-weight:600;color:var(--pau-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Contact Details</h4>
+          ${contactInfo}
+          <a href="${propsUrl}" class="btn-primary"
+            style="width:100%;text-align:center;display:block;margin-top:16px;">
+            🏠 ${propsText}
+          </a>
+        </div>
+      `;
+
+      document.getElementById('modalOverlay').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    // Show sample data immediately, then try backend
+    ALL_LANDLORDS = SAMPLE_LANDLORDS;
+    renderLandlords(ALL_LANDLORDS);
+    loadLandlords();
+  </script>
+</body>
+</html>
