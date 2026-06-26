@@ -9,6 +9,7 @@ const fs      = require('fs');
 require('dotenv').config();
 
 const pool = require('./db');
+const { initializeDatabase } = require('./init-db');
 const app  = express();
 
 app.use(cors({ origin: '*' }));
@@ -291,11 +292,18 @@ app.get('/api/messages/landlord/:id', async (req, res) => {
 // ==========================================
 // START
 // ==========================================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log('\n================================================');
-  console.log('  ✅ PAU Housing Backend is RUNNING!');
-  console.log(`  👉 http://localhost:${PORT}`);
-  console.log('  Keep this terminal open while using the site.');
-  console.log('================================================\n');
-});
+initializeDatabase()
+  .then(() => {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log('\n================================================');
+      console.log('  ✅ PAU Housing Backend is RUNNING!');
+      console.log(`  👉 http://localhost:${PORT}`);
+      console.log('  Keep this terminal open while using the site.');
+      console.log('================================================\n');
+    });
+  })
+  .catch((err) => {
+    console.error('❌ Failed to initialize database schema:', err.message);
+    process.exit(1);
+  });
