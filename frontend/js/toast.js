@@ -3,7 +3,7 @@
 // ==========================================
 function showToast(message, type = 'success', duration = 3500) {
   document.querySelectorAll('.pau-toast').forEach(t => t.remove());
-  const icons  = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' };
+  const icons = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' };
   const colors = {
     success: { bg:'#d1fae5', border:'#059669', text:'#065f46' },
     error:   { bg:'#fee2e2', border:'#dc2626', text:'#991b1b' },
@@ -13,15 +13,19 @@ function showToast(message, type = 'success', duration = 3500) {
   const c = colors[type] || colors.info;
   const toast = document.createElement('div');
   toast.className = 'pau-toast';
+  toast.setAttribute('role', 'status');
   toast.style.cssText = `
     position:fixed; top:24px; right:24px; z-index:99999;
     background:${c.bg}; border:1.5px solid ${c.border}; color:${c.text};
-    padding:14px 20px; border-radius:12px; font-family:'DM Sans',sans-serif;
-    font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.15); max-width:360px; line-height:1.4;
-    animation:toastIn 0.3s ease;
+    padding:14px 18px; border-radius:16px; font-family:'DM Sans',sans-serif;
+    font-size:14px; font-weight:600; display:flex; align-items:flex-start; gap:10px;
+    box-shadow:0 14px 40px rgba(0,0,0,0.18); max-width:360px; line-height:1.45;
+    animation:toastIn 0.3s ease; backdrop-filter:blur(10px);
   `;
-  toast.innerHTML = `<span style="font-size:20px;">${icons[type]||'ℹ️'}</span><span>${message}</span>`;
+  toast.innerHTML = `
+    <span style="font-size:20px;line-height:1;">${icons[type] || 'ℹ️'}</span>
+    <span style="display:block;">${message}</span>
+  `;
   if (!document.getElementById('toastStyle')) {
     const s = document.createElement('style');
     s.id = 'toastStyle';

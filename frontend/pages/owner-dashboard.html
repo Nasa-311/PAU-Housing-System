@@ -133,7 +133,7 @@
       <a href="#" class="sidebar-link" onclick="showTab('messages',this)"><span class="sidebar-icon">💬</span> Messages <span class="msg-badge" id="msgBadge" style="display:none">0</span></a>
       <a href="#" class="sidebar-link" onclick="showTab('profile',this)"><span class="sidebar-icon">👤</span> My Profile</a>
       <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
-      <a href="index.html" class="sidebar-link"><span class="sidebar-icon">🌐</span> Back to Site</a>
+      <a href="../../index.html" class="sidebar-link"><span class="sidebar-icon">🌐</span> Back to Site</a>
     </nav>
     <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
   </aside>
@@ -260,7 +260,9 @@
   </main>
 
   <script>
-    const API   = 'http://localhost:3000/api';
+    const API   = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/api'
+      : 'https://pau-housing-system.onrender.com/api';
     const user  = JSON.parse(localStorage.getItem('pau_user') || '{}');
     const token = localStorage.getItem('pau_token');
 

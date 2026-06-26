@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css"/>
+  <script src="../js/accessibility.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/toast.js"></script>
 </head>
 <body>
 
@@ -16,7 +19,7 @@
       <span class="nav-title">PAU Housing</span>
     </div>
     <ul class="nav-links" id="navLinks">
-      <li><a href="index.html">Home</a></li>
+      <li><a href="../../index.html">Home</a></li>
       <li><a href="properties.html">Properties</a></li>
       <li><a href="landlords.html">Landlords</a></li>
       <li><a href="login.html" class="btn-nav">Login</a></li>
@@ -25,15 +28,14 @@
     <button class="hamburger" id="hamburger">&#9776;</button>
   </nav>
 
-  <div style="padding:90px 5% 0; max-width:1100px; margin:0 auto;">
+  <div style="padding:90px 5% 0;max-width:1100px;margin:0 auto;">
     <a href="properties.html" style="color:var(--pau-blue);font-size:14px;font-weight:600;text-decoration:none;">&#8592; Back to Properties</a>
   </div>
 
-  <div class="detail-layout" id="detailLayout">
-    <p class="loading-text" style="padding:80px;">Loading property details...</p>
+  <div id="detailLayout">
+    <p class="loading-text" style="padding:80px;text-align:center;">Loading property details...</p>
   </div>
 
-  <!-- CHAT BOX -->
   <div class="chat-section" id="chatSection" style="display:none;">
     <div style="max-width:1100px;margin:0 auto;padding:0 5% 60px;">
       <div class="chat-box">
@@ -53,14 +55,14 @@
           </div>
         </div>
         <div class="chat-input-row">
-          <input type="text" id="chatInput" placeholder="Type your message..." onkeydown="if(event.key==='Enter') sendMessage()"/>
+          <input type="text" id="chatInput" placeholder="Type your message..."
+            onkeydown="if(event.key==='Enter') sendMessage()"/>
           <button class="chat-send-btn" onclick="sendMessage()">Send &#10148;</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- AUTH GUARD -->
   <div class="auth-guard-overlay" id="authGuard">
     <div class="auth-guard-box">
       <div class="guard-icon">&#128274;</div>
@@ -71,7 +73,10 @@
         <a href="register.html" class="btn-outline">Sign Up Free</a>
       </div>
       <br/>
-      <button class="btn-guard-close" onclick="document.getElementById('authGuard').style.display='none';document.body.style.overflow='';">Maybe later</button>
+      <button class="btn-guard-close"
+        onclick="document.getElementById('authGuard').style.display='none';document.body.style.overflow='';">
+        Maybe later
+      </button>
     </div>
   </div>
 
@@ -87,19 +92,12 @@
 
   <script src="../js/main.js"></script>
   <script>
-    const API = 'http://localhost:3000/api';
-
-    // =====================================================
-    // IMAGE SETS — your real photos used based on room type
-    // =====================================================
     const IMAGES = {
-      // Your uploaded self-contain photos
       'self-contain': [
-        '../images/self-contained1.jpg',
-        '../images/self-contained2.jpg',
-        '../images/self-contained4.jpg',
+        'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=900&q=80',
+        'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=900&q=80',
+        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&q=80',
       ],
-      // Fallbacks for other types
       'single': [
         'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=900&q=80',
         'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&q=80',
@@ -107,8 +105,8 @@
       ],
       'shared': [
         'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&q=80',
-        'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=900&q=80',
         'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=900&q=80',
+        'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=900&q=80',
       ],
       'flat': [
         'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=900&q=80',
@@ -118,42 +116,36 @@
     };
 
     function getImagesForType(roomType) {
-      const type = (roomType || '').toLowerCase();
-      if (type.includes('self')) return IMAGES['self-contain'];
-      if (type.includes('single'))  return IMAGES['single'];
-      if (type.includes('shared'))  return IMAGES['shared'];
-      if (type.includes('flat'))    return IMAGES['flat'];
-      return IMAGES['self-contain']; // default to your photos
+      const t = (roomType || '').toLowerCase();
+      if (t.includes('self'))   return IMAGES['self-contain'];
+      if (t.includes('single')) return IMAGES['single'];
+      if (t.includes('shared')) return IMAGES['shared'];
+      if (t.includes('flat'))   return IMAGES['flat'];
+      return IMAGES['self-contain'];
     }
 
-    // =====================================================
-    // SAMPLE DATA
-    // =====================================================
     const SAMPLE_PROPERTIES = [
-      { id:1,  name:'Sunrise Lodge',      address:'Beside PAU Gate, Ibeju-Lekki',  rent:350000, room_type:'self-contain', distance_from_school:0.3, description:'Clean self-contain unit with kitchen and bathroom. 24/7 security and constant water supply. 5 minutes walk from PAU main gate.', landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true },
-      { id:2,  name:'Grace Apartment',    address:'Abraham Adesanya Estate, Ajah',  rent:280000, room_type:'shared',       distance_from_school:0.8, description:'Affordable shared room in a clean compound. Good road network to PAU. Generator backup available.',                              landlord_name:'Mrs. Chioma Okafor',  phone:'08098765432', landlord_email:'chioma@example.com',  available:true },
-      { id:3,  name:'Royal Chambers',     address:'Bogije, Ibeju-Lekki',            rent:480000, room_type:'flat',         distance_from_school:1.2, description:'Spacious 2-bedroom flat perfect for 2 students sharing. Fully tiled, large windows, borehole water.',                           landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true },
-      { id:4,  name:'Palm View Hostel',   address:'Lakowe Estate',                   rent:220000, room_type:'single',       distance_from_school:2.0, description:'Budget single room with good ventilation and security. Motorcycle (okada) available to PAU daily.',                             landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com',  available:true },
-      { id:5,  name:'Lekki Gardens',      address:'Ibeju-Lekki Town',               rent:400000, room_type:'self-contain', distance_from_school:0.6, description:'Modern self-contain with fitted kitchen. Serene environment, close to PAU. CCTV cameras on site.',                              landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com',   available:true },
-      { id:6,  name:'Blue Crest Rooms',   address:'Ajah, Lagos',                    rent:310000, room_type:'shared',       distance_from_school:1.5, description:'Clean shared rooms. Common area with seating. Easy bus access to PAU campus daily.',                                             landlord_name:'Mrs. Ngozi Eze',      phone:'08145678901', landlord_email:'ngozi@example.com',   available:false },
-      { id:7,  name:'Harmony Court',      address:'Elerangbe, Ibeju-Lekki',         rent:450000, room_type:'flat',         distance_from_school:0.9, description:'Lovely 1-bedroom flat in a quiet estate. Prepaid meter, borehole and generator. Very close to PAU.',                            landlord_name:'Mr. Tunde Balogun',   phone:'08023456789', landlord_email:'tunde@example.com',   available:true },
-      { id:8,  name:'Sunrise Court',      address:'Akodo, Ibeju-Lekki',             rent:260000, room_type:'single',       distance_from_school:1.8, description:'Affordable single room with fan, reading table and wardrobe. Secure compound with gate man.',                                    landlord_name:'Mrs. Ngozi Eze',      phone:'08145678901', landlord_email:'ngozi@example.com',   available:true },
-      { id:9,  name:'Victoria Suites',    address:'Ibeju-Lekki',                    rent:520000, room_type:'flat',         distance_from_school:0.5, description:'Executive 2-bedroom flat. 24-hour power (solar + generator). Ideal for 2 students splitting rent.',                             landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com',   available:true },
-      { id:10, name:'Peace Haven',        address:'Bogije Road, Ibeju-Lekki',       rent:290000, room_type:'self-contain', distance_from_school:1.0, description:'Neat self-contain in a peaceful compound. Tiled floors, ceiling fan, burglar-proof windows throughout.',                         landlord_name:'Mrs. Chioma Okafor',  phone:'08098765432', landlord_email:'chioma@example.com',  available:true },
-      { id:11, name:'Green Valley Rooms', address:'Lakowe-Akodo Road',              rent:200000, room_type:'single',       distance_from_school:2.5, description:'Very affordable single room for students on a tight budget. Shared toilet and bathroom kept very clean.',                         landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com',  available:true },
-      { id:12, name:'Ambassador Lodge',   address:'Beside PAU Road, Ibeju-Lekki',  rent:380000, room_type:'self-contain', distance_from_school:0.4, description:'Well-finished self-contain very close to PAU. Running water, prepaid electricity meter, fully tiled throughout.',                 landlord_name:'Mr. Tunde Balogun',   phone:'08023456789', landlord_email:'tunde@example.com',   available:true },
+      { id:1,  name:'Sunrise Lodge',      address:'Beside PAU Gate, Ibeju-Lekki',  rent:350000, room_type:'self-contain', distance_from_school:0.3, description:'Clean self-contain with kitchen and bathroom. 24/7 security, water supply. 5 mins from PAU gate.', landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true },
+      { id:2,  name:'Grace Apartment',    address:'Abraham Adesanya Estate, Ajah',  rent:280000, room_type:'shared',       distance_from_school:0.8, description:'Affordable shared room in a clean compound. Good road network to PAU.', landlord_name:'Mrs. Chioma Okafor', phone:'08098765432', landlord_email:'chioma@example.com', available:true },
+      { id:3,  name:'Royal Chambers',     address:'Bogije, Ibeju-Lekki',            rent:480000, room_type:'flat',         distance_from_school:1.2, description:'Spacious 2-bedroom flat for 2 students. Fully tiled, borehole water.', landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true },
+      { id:4,  name:'Palm View Hostel',   address:'Lakowe Estate',                   rent:220000, room_type:'single',       distance_from_school:2.0, description:'Budget single room with good ventilation. Okada available to PAU daily.', landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com', available:true },
+      { id:5,  name:'Lekki Gardens',      address:'Ibeju-Lekki Town',               rent:400000, room_type:'self-contain', distance_from_school:0.6, description:'Modern self-contain with fitted kitchen. Close to PAU. CCTV on site.', landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com', available:true },
+      { id:6,  name:'Blue Crest Rooms',   address:'Ajah, Lagos',                    rent:310000, room_type:'shared',       distance_from_school:1.5, description:'Clean shared rooms. Easy bus access to PAU campus daily.', landlord_name:'Mrs. Ngozi Eze', phone:'08145678901', landlord_email:'ngozi@example.com', available:false },
+      { id:7,  name:'Harmony Court',      address:'Elerangbe, Ibeju-Lekki',         rent:450000, room_type:'flat',         distance_from_school:0.9, description:'1-bedroom flat in quiet estate. Prepaid meter, borehole and generator.', landlord_name:'Mr. Tunde Balogun', phone:'08023456789', landlord_email:'tunde@example.com', available:true },
+      { id:8,  name:'Sunrise Court',      address:'Akodo, Ibeju-Lekki',             rent:260000, room_type:'single',       distance_from_school:1.8, description:'Single room with fan, reading table and wardrobe. Secure compound.', landlord_name:'Mrs. Ngozi Eze', phone:'08145678901', landlord_email:'ngozi@example.com', available:true },
+      { id:9,  name:'Victoria Suites',    address:'Ibeju-Lekki',                    rent:520000, room_type:'flat',         distance_from_school:0.5, description:'Executive 2-bedroom. 24-hour power. Ideal for 2 students.', landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com', available:true },
+      { id:10, name:'Peace Haven',        address:'Bogije Road, Ibeju-Lekki',       rent:290000, room_type:'self-contain', distance_from_school:1.0, description:'Neat self-contain in peaceful compound. Tiled floors, ceiling fan.', landlord_name:'Mrs. Chioma Okafor', phone:'08098765432', landlord_email:'chioma@example.com', available:true },
+      { id:11, name:'Green Valley Rooms', address:'Lakowe-Akodo Road',              rent:200000, room_type:'single',       distance_from_school:2.5, description:'Very affordable single room. Shared toilet and bathroom kept clean.', landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com', available:true },
+      { id:12, name:'Ambassador Lodge',   address:'Beside PAU Road, Ibeju-Lekki',  rent:380000, room_type:'self-contain', distance_from_school:0.4, description:'Well-finished self-contain very close to PAU. Running water, prepaid electricity.', landlord_name:'Mr. Tunde Balogun', phone:'08023456789', landlord_email:'tunde@example.com', available:true },
     ];
 
     const params = new URLSearchParams(window.location.search);
     const propId = parseInt(params.get('id')) || 1;
 
-    // =====================================================
-    // LOAD PROPERTY
-    // =====================================================
     async function loadProperty() {
       let property;
       try {
-        const res = await fetch(`${API}/properties/${propId}`);
+        const res = await fetch(`${API_BASE}/properties/${propId}`);
         if (res.ok) property = await res.json();
         else throw new Error('not found');
       } catch {
@@ -162,21 +154,17 @@
       renderProperty(property);
     }
 
-    // =====================================================
-    // RENDER PROPERTY — uses correct images per room type
-    // =====================================================
     function renderProperty(p) {
       const imgs    = getImagesForType(p.room_type);
-      const mainImg = imgs[0];
-      const thumbs  = imgs; // show all 3 as thumbnails
+      const mainImg = p.image_url
+        ? `${API_BASE.replace('/api', '')}${p.image_url}`
+        : imgs[0];
+      const thumbImgs = imgs;
 
       document.getElementById('detailLayout').innerHTML = `
         <div style="max-width:1100px;margin:0 auto;padding:32px 5% 20px;">
           <div class="detail-grid">
-
-            <!-- LEFT -->
             <div class="detail-left">
-              <!-- Main image -->
               <div class="detail-main-img">
                 <img id="mainImg" src="${mainImg}" alt="${p.name}"
                   onerror="this.src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=900&q=80'"/>
@@ -184,22 +172,17 @@
                   ${p.available !== false ? '✅ Available' : '❌ Not Available'}
                 </span>
               </div>
-
-              <!-- Thumbnails — clicking changes main image -->
               <div class="detail-thumb-row">
-                ${thumbs.map((img, i) => `
+                ${thumbImgs.map((img, i) => `
                   <img src="${img}" alt="view ${i+1}"
                     onclick="document.getElementById('mainImg').src='${img}'"
                     onerror="this.style.display='none'"/>
                 `).join('')}
               </div>
-
-              <!-- Info card -->
               <div class="detail-info-card">
                 <span class="property-badge" style="font-size:13px;padding:5px 14px;">${p.room_type}</span>
                 <h1 class="detail-title">${p.name}</h1>
                 <p class="detail-address">📍 ${p.address}</p>
-
                 <div class="detail-meta-row">
                   <div class="detail-meta-item">
                     <span>🚶</span>
@@ -214,12 +197,10 @@
                     <div><strong>${p.available !== false ? 'Yes' : 'No'}</strong><small>Available</small></div>
                   </div>
                 </div>
-
                 <div class="detail-desc">
                   <h3>About This Property</h3>
                   <p>${p.description || 'A comfortable accommodation option near Pan-Atlantic University campus.'}</p>
                 </div>
-
                 <div class="detail-amenities">
                   <h3>Amenities</h3>
                   <div class="amenities-grid">
@@ -233,8 +214,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- RIGHT -->
             <div class="detail-right">
               <div class="detail-price-card">
                 <p style="font-size:13px;color:var(--pau-gray);margin-bottom:4px;">Annual Rent</p>
@@ -244,16 +223,17 @@
                 <p style="font-size:12px;color:var(--pau-gray);margin-bottom:20px;">
                   &#8776; &#8358;${Math.round(p.rent/12).toLocaleString()}/month
                 </p>
-                <button class="btn-primary" style="width:100%;margin-bottom:10px;text-align:center;"
-                  onclick="saveThisProperty(${JSON.stringify(p).replace(/"/g,'&quot;').replace(/'/g,'&#39;')})">
+                <button class="btn-primary"
+                  style="width:100%;margin-bottom:10px;text-align:center;"
+                  onclick="saveThisProperty(${JSON.stringify(p).replace(/"/g,'&quot;')})">
                   &#128190; Save Property
                 </button>
-                <button class="btn-outline" style="width:100%;text-align:center;"
+                <button class="btn-outline"
+                  style="width:100%;text-align:center;"
                   onclick="openChat('${p.landlord_name || 'Landlord'}')">
                   &#128172; Chat with Landlord
                 </button>
               </div>
-
               <div class="detail-landlord-card">
                 <h3>Property Owner</h3>
                 <div class="detail-landlord-info">
@@ -270,7 +250,6 @@
                   View All Landlords
                 </a>
               </div>
-
               <div class="detail-map-placeholder">
                 <p>📍 ${p.address}</p>
                 <p style="font-size:13px;color:var(--pau-gray);margin-top:6px;">
@@ -278,22 +257,15 @@
                 </p>
               </div>
             </div>
-
           </div>
         </div>
       `;
 
-      // Show chat
       document.getElementById('chatSection').style.display = 'block';
       document.getElementById('chatLandlordName').textContent = p.landlord_name || 'Property Owner';
-
-      // Store property for chat use
       window._currentProperty = p;
     }
 
-    // =====================================================
-    // SAVE PROPERTY
-    // =====================================================
     function saveThisProperty(p) {
       const token = localStorage.getItem('pau_token');
       if (!token) {
@@ -302,15 +274,12 @@
         return;
       }
       let saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
-      if (saved.find(s => s.id === p.id)) { alert('Already saved!'); return; }
+      if (saved.find(s => s.id === p.id)) { showToast('This property is already saved.', 'info'); return; }
       saved.push(p);
       localStorage.setItem('pau_saved', JSON.stringify(saved));
-      alert('✅ Property saved to your dashboard!');
+      showToast('Property saved to your dashboard.', 'success');
     }
 
-    // =====================================================
-    // CHAT
-    // =====================================================
     function openChat(landlordName) {
       const token = localStorage.getItem('pau_token');
       if (!token) {
@@ -338,7 +307,6 @@
       const msgs = document.getElementById('chatMessages');
       const p    = window._currentProperty || {};
 
-      // Show student message immediately
       msgs.innerHTML += `
         <div class="chat-msg student-msg">
           <p>${msg}</p>
@@ -347,9 +315,8 @@
       input.value = '';
       msgs.scrollTop = msgs.scrollHeight;
 
-      // Save message to backend
       try {
-        await fetch(`${API}/messages`, {
+        await fetch(`${API_BASE}/messages`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -359,19 +326,15 @@
             message:     msg
           })
         });
-      } catch {
-        // Message saved locally only if backend not running
-      }
+      } catch {}
 
-      // Simulated landlord reply
       setTimeout(() => {
         const replies = [
           'Thank you for your interest! The room is still available.',
           'Yes, you can come for inspection anytime. Just call ahead.',
           'The rent is payable annually. We can discuss payment plans.',
-          'Water and electricity (PHCN + generator) are provided.',
+          'Water and electricity are provided.',
           'Please call me on my number to arrange a viewing.',
-          'The property is close to PAU, very convenient for students.',
         ];
         const reply = replies[Math.floor(Math.random() * replies.length)];
         msgs.innerHTML += `
@@ -382,10 +345,6 @@
         msgs.scrollTop = msgs.scrollHeight;
       }, 1500);
     }
-
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.getElementById('navLinks').classList.toggle('open');
-    });
 
     loadProperty();
   </script>

@@ -16,7 +16,7 @@
       <span class="nav-title">PAU Housing</span>
     </div>
     <ul class="nav-links" id="navLinks">
-      <li><a href="index.html">Home</a></li>
+      <li><a href="../../index.html">Home</a></li>
       <li><a href="properties.html">Properties</a></li>
       <li><a href="landlords.html" class="active">Landlords</a></li>
       <li><a href="login.html" class="btn-nav">Login</a></li>
@@ -75,7 +75,7 @@
   <script src="../js/accessibility.js"></script>
   <script src="../js/main.js"></script>
   <script>
-    const API = 'http://localhost:3000/api';
+    const API = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://pau-housing-system.onrender.com'
 
     // Sample data shown when backend is offline
     const SAMPLE_LANDLORDS = [

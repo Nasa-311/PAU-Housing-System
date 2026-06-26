@@ -16,7 +16,7 @@
       <span class="nav-title">PAU Housing</span>
     </div>
     <ul class="nav-links" id="navLinks">
-      <li><a href="index.html">Home</a></li>
+      <li><a href="../../index.html">Home</a></li>
       <li><a href="properties.html" class="active">Properties</a></li>
       <li><a href="landlords.html">Landlords</a></li>
       <li><a href="login.html" class="btn-nav">Login</a></li>
@@ -91,6 +91,7 @@
   </div>
 
   <script src="../js/accessibility.js"></script>
+  <script src="../js/toast.js"></script>
   <script src="../js/main.js"></script>
   <script>
 
@@ -236,10 +237,10 @@
       const token = localStorage.getItem('pau_token');
       if (!token) { window.location.href = 'login.html'; return; }
       let saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
-      if (saved.find(s => s.id === p.id)) { alert('Already saved!'); return; }
+      if (saved.find(s => s.id === p.id)) { showToast('This property is already saved.', 'info'); return; }
       saved.push(p);
       localStorage.setItem('pau_saved', JSON.stringify(saved));
-      alert('✅ Property saved to your dashboard!');
+      showToast('Property saved to your dashboard.', 'success');
     }
 
     function clearFilters() {

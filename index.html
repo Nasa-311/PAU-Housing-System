@@ -1,11 +1,306 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta http-equiv="refresh" content="0; url=frontend/pages/index.html"/>
-  <title>PAU Housing System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PAU Housing System — Find Your Home Near Campus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- FIXED: Changed path from ../css/ to css/ since index.html is at the root level -->
+  <link rel="stylesheet" href="/frontend/css/style.css"/>
+  <script src="frontend/js/accessibility.js"></script>
 </head>
 <body>
-  <p>Redirecting to PAU Housing System...</p>
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">🏛</span>
+      <span class="nav-title">PAU Housing</span>
+    </div>
+    <div class="nav-actions" id="navActions">
+      <ul class="nav-links" id="navLinks">
+        <!-- FIXED: Added pages/ directory to the internal subpages -->
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="frontend/pages/properties.html">Properties</a></li>
+        <li><a href="frontend/pages/landlords.html">Landlords</a></li>
+        <li><a href="frontend/pages/login.html" class="btn-nav">Login</a></li>
+        <li><a href="frontend/pages/register.html" class="btn-nav-outline">Sign Up</a></li>
+      </ul>
+    </div>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </nav>
+
+  <!-- HERO SLIDESHOW — FIXED: Removed '../' from background image paths -->
+  <section class="hero">
+    <div class="slideshow">
+      <div class="slide active" style="background-image:url('frontend/images/house1.jpg')"></div>
+      <div class="slide" style="background-image:url('frontend/images/house2.jpg')"></div>
+      <div class="slide" style="background-image:url('frontend/images/house3.jpg')"></div>
+      <div class="slide" style="background-image:url('frontend/images/house4.jpg')"></div>
+      <div class="slide" style="background-image:url('frontend/images/house5.jpg')"></div>
+      <div class="slide-overlay"></div>
+    </div>
+    <div class="slide-dots">
+      <span class="dot active" onclick="goToSlide(0)"></span>
+      <span class="dot" onclick="goToSlide(1)"></span>
+      <span class="dot" onclick="goToSlide(2)"></span>
+      <span class="dot" onclick="goToSlide(3)"></span>
+      <span class="dot" onclick="goToSlide(4)"></span>
+    </div>
+    <button class="slide-arrow left" onclick="changeSlide(-1)">&#8249;</button>
+    <button class="slide-arrow right" onclick="changeSlide(1)">&#8250;</button>
+
+    <div class="hero-content">
+      <div class="hero-badge">Pan-Atlantic University · Official Housing Portal</div>
+      <div id="homeGreeting" class="hero-welcome" style="display:none;">Welcome back, <span id="homeUserName"></span>!</div>
+      <h1 class="hero-title">Find Your <em>Perfect Home</em><br/>Near Campus</h1>
+      <p class="hero-subtitle">Browse verified off-campus housing, connect with trusted landlords, and secure accommodation that fits your student life.</p>
+      <div class="search-box">
+        <div class="search-field">
+          <label>Name / Area</label>
+          <input type="text" placeholder="e.g. Beside PAU Gate..." id="searchName"/>
+        </div>
+        <div class="search-field">
+          <label>Room Type</label>
+          <select id="roomType">
+            <option value="">All Types</option>
+            <option value="single">Single Room</option>
+            <option value="shared">Shared Room</option>
+            <option value="self-contain">Self Contain</option>
+            <option value="flat">Flat</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label>Max Rent: <strong id="rentDisplay">&#8358;500,000</strong>/yr</label>
+          <input type="range" id="maxRent" min="50000" max="1000000" step="10000" value="500000"
+            oninput="document.getElementById('rentDisplay').textContent='&#8358;'+Number(this.value).toLocaleString()"/>
+        </div>
+        <button class="btn-search" onclick="searchProperties()">Search</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-banner">
+    <div class="stat"><span class="stat-num" id="countProperties">48</span><span class="stat-label">Properties Listed</span></div>
+    <div class="stat"><span class="stat-num" id="countLandlords">21</span><span class="stat-label">Verified Landlords</span></div>
+    <div class="stat"><span class="stat-num">3km</span><span class="stat-label">Max Distance</span></div>
+    <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Verified Listings</span></div>
+  </section>
+
+  <!-- FEATURED PROPERTIES -->
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <p class="section-eyebrow">Browse Listings</p>
+        <h2>Featured Properties</h2>
+      </div>
+      <a href="frontend/pages/properties.html" class="view-all">View All &#8594;</a>
+    </div>
+    <div class="properties-grid" id="featuredProperties">
+      <div class="property-card" onclick="window.location.href='frontend/pages/property-detail.html?id=1'">
+        <div class="property-img-wrap">
+          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=80" alt="Sunrise Lodge"/>
+          <span class="property-status available">Available</span>
+          <button class="save-btn" title="Save">&#9825;</button>
+        </div>
+        <div class="property-body">
+          <span class="property-badge">Self Contain</span>
+          <p class="property-name">Sunrise Lodge</p>
+          <p class="property-meta">📍 Beside PAU Gate, Ibeju-Lekki &nbsp;|&nbsp; 🚶 0.3km from PAU</p>
+          <div class="property-footer">
+            <div class="property-price">&#8358;350,000 <span>/yr</span></div>
+            <a class="btn-details" href="frontend/pages/property-detail.html?id=1">View Details</a>
+          </div>
+        </div>
+      </div>
+      <div class="property-card" onclick="window.location.href='frontend/pages/property-detail.html?id=2'">
+        <div class="property-img-wrap">
+          <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80" alt="Grace Apartment"/>
+          <span class="property-status available">Available</span>
+          <button class="save-btn" title="Save">&#9825;</button>
+        </div>
+        <div class="property-body">
+          <span class="property-badge">Shared Room</span>
+          <p class="property-name">Grace Apartment</p>
+          <p class="property-meta">📍 Abraham Adesanya, Ajah &nbsp;|&nbsp; 🚶 0.8km from PAU</p>
+          <div class="property-footer">
+            <div class="property-price">&#8358;280,000 <span>/yr</span></div>
+            <a class="btn-details" href="frontend/pages/property-detail.html?id=2">View Details</a>
+          </div>
+        </div>
+      </div>
+      <div class="property-card" onclick="window.location.href='frontend/pages/property-detail.html?id=3'">
+        <div class="property-img-wrap">
+          <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600&q=80" alt="Royal Chambers"/>
+          <span class="property-status unavailable">Unavailable</span>
+          <button class="save-btn" title="Save">&#9825;</button>
+        </div>
+        <div class="property-body">
+          <span class="property-badge">Flat</span>
+          <p class="property-name">Royal Chambers</p>
+          <p class="property-meta">📍 Bogije, Ibeju-Lekki &nbsp;|&nbsp; 🚶 1.2km from PAU</p>
+          <div class="property-footer">
+            <div class="property-price">&#8358;480,000 <span>/yr</span></div>
+            <a class="btn-details" href="frontend/pages/property-detail.html?id=3">View Details</a>
+          </div>
+        </div>
+      </div>
+      <div class="property-card" onclick="window.location.href='frontend/pages/property-detail.html?id=4'">
+        <div class="property-img-wrap">
+          <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80" alt="Palm View Hostel"/>
+          <span class="property-status available">Available</span>
+          <button class="save-btn" title="Save">&#9825;</button>
+        </div>
+        <div class="property-body">
+          <span class="property-badge">Single Room</span>
+          <p class="property-name">Palm View Hostel</p>
+          <p class="property-meta">📍 Lakowe Estate &nbsp;|&nbsp; 🚶 2.0km from PAU</p>
+          <div class="property-footer">
+            <div class="property-price">&#8358;220,000 <span>/yr</span></div>
+            <a class="btn-details" href="frontend/pages/property-detail.html?id=4">View Details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY STRIP — FIXED: Removed '../' from image sources -->
+  <section class="gallery-strip">
+    <img src="frontend/images/self-contained1.jpg" alt="Apartment interior"/>
+    <img src="frontend/images/gallery2.jpg" alt="Living room"/>
+    <img src="frontend/images/gallery3.jpg" alt="Bedroom"/>
+    <img src="frontend/images/gallery4.jpg" alt="Kitchen"/>
+    <img src="frontend/images/gallery5.jpg" alt="House exterior"/>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="section-inner">
+      <div class="section-header centered">
+        <p class="section-eyebrow">Simple Process</p>
+        <h2>How It Works</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card"><div class="step-num">01</div><div class="step-icon">&#128269;</div><h3>Search</h3><p>Filter listings by location, price and room type to find what fits your budget.</p></div>
+        <div class="step-card"><div class="step-num">02</div><div class="step-icon">&#128203;</div><h3>Compare</h3><p>View full details, distance from PAU and landlord info before deciding.</p></div>
+        <div class="step-card"><div class="step-num">03</div><div class="step-icon">&#128190;</div><h3>Save</h3><p>Bookmark favourites to your Student Dashboard to revisit anytime.</p></div>
+        <div class="step-card"><div class="step-num">04</div><div class="step-icon">&#128222;</div><h3>Connect</h3><p>Contact verified landlords directly and secure your accommodation.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR STUDENTS / LANDLORDS — FIXED: Removed '../' from image sources and updated href paths to pages/ -->
+  <section class="section two-col-section">
+    <div class="two-col-card">
+      <img src="images/students.jpg" alt="Students"/>
+      <div class="two-col-body">
+        <span class="col-badge blue">For Students</span>
+        <h3>Find &amp; Save Your Perfect Room</h3>
+        <p>Create a free account, browse verified listings near PAU, save your favourites, and contact landlords from your dashboard.</p>
+        <a href="pages/register.html?role=student" class="btn-primary">Register as Student</a>
+      </div>
+    </div>
+    <div class="two-col-card">
+      <img src="images/property-owner.jpg" alt="Property owner"/>
+      <div class="two-col-body">
+        <span class="col-badge gold">For Property Owners</span>
+        <h3>List &amp; Manage Your Properties</h3>
+        <p>Register as a landlord, add your listings with photos, and connect with PAU students searching for housing near campus.</p>
+        <a href="pages/register.html?role=landlord" class="btn-primary gold">Register as Landlord</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER — FIXED: Added pages/ prefix to navigation items -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <div class="footer-logo">&#127963; <span>PAU Housing</span></div>
+      <p>The official off-campus housing portal for Pan-Atlantic University.</p>
+    </div>
+    <div class="footer-col"><h4>Explore</h4><a href="pages/properties.html">Properties</a><a href="pages/landlords.html">Landlords</a></div>
+    <div class="footer-col"><h4>Account</h4><a href="pages/login.html">Login</a><a href="pages/register.html">Sign Up</a><a href="pages/student-dashboard.html">Student Dashboard</a><a href="pages/owner-dashboard.html">Owner Dashboard</a></div>
+    <div class="footer-col"><h4>Contact</h4><p>housing@pau.edu.ng</p><p>Ibeju-Lekki, Lagos</p></div>
+  </footer>
+
+  <!-- AUTH GUARD — FIXED: Added pages/ directory to redirection links -->
+  <div class="auth-guard-overlay" id="authGuard">
+    <div class="auth-guard-box">
+      <div class="guard-icon">&#128274;</div>
+      <h2>Sign In Required</h2>
+      <p>You need to be logged in to browse all property listings.</p>
+      <div class="auth-guard-buttons">
+        <a href="pages/login.html" class="btn-primary">Sign In</a>
+        <a href="pages/register.html" class="btn-outline">Sign Up Free</a>
+      </div>
+      <br/>
+      <button class="btn-guard-close" onclick="document.getElementById('authGuard').style.display='none';document.body.style.overflow=''">Maybe later</button>
+    </div>
+  </div>
+
+  <!-- FIXED: Changed script reference path -->
+  <script src="frontend/js/config.js"></script>
+  <script src="frontend/js/main.js"></script>
+  <script>
+    function refreshIndexNav() {
+      const token = localStorage.getItem('pau_token');
+      const user = JSON.parse(localStorage.getItem('pau_user') || 'null');
+      const navLinks = document.getElementById('navLinks');
+      if (!navLinks) return;
+
+      const loginLink = navLinks.querySelector('a[href="frontend/pages/login.html"]');
+      const registerLink = navLinks.querySelector('a[href="frontend/pages/register.html"]');
+
+      if (token && user && user.name) {
+        if (loginLink) loginLink.closest('li')?.remove();
+        if (registerLink) registerLink.closest('li')?.remove();
+
+        const dashUrl = user.role === 'landlord' ? 'frontend/pages/owner-dashboard.html' : 'frontend/pages/student-dashboard.html';
+        const nameLi = document.createElement('li');
+        nameLi.innerHTML = `<a href="${dashUrl}" class="btn-nav">👤 ${user.name.split(' ')[0]}</a>`;
+        navLinks.appendChild(nameLi);
+
+        const logoutLi = document.createElement('li');
+        logoutLi.innerHTML = `<a href="#" class="btn-nav-outline" id="indexLogoutBtn">Sign Out</a>`;
+        navLinks.appendChild(logoutLi);
+        document.getElementById('indexLogoutBtn')?.addEventListener('click', e => {
+          e.preventDefault();
+          if (typeof logoutUser === 'function') logoutUser(e);
+          else {
+            localStorage.removeItem('pau_token');
+            localStorage.removeItem('pau_user');
+            window.location.href = 'index.html';
+          }
+        });
+      }
+    }
+
+    if (typeof updateNavbar === 'function') updateNavbar();
+    if (typeof updateHomeGreeting === 'function') updateHomeGreeting();
+    refreshIndexNav();
+    let cur = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots   = document.querySelectorAll('.dot');
+    function goToSlide(n) {
+      slides[cur].classList.remove('active'); dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active'); dots[cur].classList.add('active');
+    }
+    function changeSlide(d) { goToSlide(cur + d); }
+    setInterval(() => changeSlide(1), 5000);
+
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+    });
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+    function requireLogin() {
+      const token = localStorage.getItem('pau_token');
+      // FIXED: Redirects to pages/ folder if token exists
+      if (token) window.location.href = 'pages/properties.html';
+      else { document.getElementById('authGuard').style.display='flex'; document.body.style.overflow='hidden'; }
+    }
+  </script>
 </body>
 </html>
