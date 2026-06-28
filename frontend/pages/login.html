@@ -49,6 +49,7 @@
     <div class="auth-form-panel">
       <div class="auth-card">
         <div class="auth-logo">
+          <!-- LOGO CONFIGURATION: Replace the line below with your own <img> tag if desired -->
           <span>🏛</span>
           <p>PAU Housing System</p>
         </div>
@@ -189,11 +190,13 @@
           localStorage.setItem('pau_user',  JSON.stringify(data.user));
           succEl.style.display = 'block';
           succEl.textContent   = `✅ Welcome back, ${data.user.name.split(' ')[0]}! Redirecting...`;
-          const isOwner = data.user.role === 'landlord' || data.user.role === 'owner';
+          
           setTimeout(() => {
-            window.location.href = isOwner
-              ? 'owner-dashboard.html'
-              : 'student-dashboard.html';
+            if (data.user.role === 'landlord') {
+              window.location.href = 'owner-dashboard.html';
+            } else {
+              window.location.href = '../../index.html';
+            }
           }, 1500);
         } else {
           errEl.style.display = 'block';
@@ -202,19 +205,23 @@
           btn.disabled    = false;
         }
       } catch {
+        // Fallback for local accounts when server connection fails
         const savedAccounts = JSON.parse(localStorage.getItem('pau_accounts') || '[]');
         const accounts = [...LOCAL_ACCOUNTS, ...savedAccounts];
         const found = accounts.find(a => a.email === email && a.password === password);
+        
         if (found) {
           localStorage.setItem('pau_token', `local-${Date.now()}`);
           localStorage.setItem('pau_user', JSON.stringify(found));
           succEl.style.display = 'block';
           succEl.textContent   = `✅ Welcome back, ${found.name.split(' ')[0]}! Redirecting...`;
-          const isOwner = found.role === 'landlord' || found.role === 'owner';
+          
           setTimeout(() => {
-            window.location.href = isOwner
-              ? 'owner-dashboard.html'
-              : 'student-dashboard.html';
+            if (found.role === 'landlord') {
+              window.location.href = 'owner-dashboard.html';
+            } else {
+              window.location.href = '../../index.html';
+            }
           }, 1200);
           return;
         }

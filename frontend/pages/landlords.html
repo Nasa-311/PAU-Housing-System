@@ -30,7 +30,6 @@
     <p>Meet the trusted property owners listing accommodation for PAU students</p>
   </div>
 
-  <!-- SEARCH BAR -->
   <div style="background:white; padding:20px 5%; border-bottom:1px solid var(--pau-border);">
     <div style="max-width:500px; margin:0 auto; display:flex; gap:10px;">
       <input type="text" id="landlordSearch" placeholder="Search by name or area..."
@@ -54,7 +53,6 @@
     </div>
   </div>
 
-  <!-- LANDLORD DETAIL MODAL -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">&#10005;</button>
@@ -76,7 +74,8 @@
   <script src="../js/config.js"></script>
   <script src="../js/main.js"></script>
   <script>
-    const API = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://pau-housing-system.onrender.com'
+    // Prioritize fallback to global API configurations defined in main.js/config.js
+    const API = window.API_BASE || 'http://localhost:3000/api';
 
     // Sample data shown when backend is offline
     const SAMPLE_LANDLORDS = [
@@ -94,21 +93,27 @@
     // ---- Load from backend first, fallback to sample ----
     async function loadLandlords() {
       try {
-        // Add 3 second timeout to fetch
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 3000);
+        const timeout = setTimeout(() => controller.abort(), 4000);
         
-        const res  = await fetch(`${API}/landlords`, { signal: controller.signal });
+        // Trim standard route tags cleanly if your configuration files vary
+        const fetchUrl = API.endsWith('/api') ? `${API}/landlords` : `${API.replace(/\/$/, '')}/landlords`;
+        const res = await fetch(fetchUrl, { signal: controller.signal });
         clearTimeout(timeout);
+        
         const data = await res.json();
-        // Merge with icons
-        ALL_LANDLORDS = data.map((l, i) => ({
-          ...l,
-          icon: ICONS[i % ICONS.length],
-          properties_count: Number(l.properties_count) || 0
-        }));
-        if (ALL_LANDLORDS.length === 0) ALL_LANDLORDS = SAMPLE_LANDLORDS;
+        
+        if (res.ok && Array.isArray(data) && data.length > 0) {
+          ALL_LANDLORDS = data.map((l, i) => ({
+            ...l,
+            icon: ICONS[i % ICONS.length],
+            properties_count: Number(l.properties_count) || 0
+          }));
+        } else {
+          ALL_LANDLORDS = SAMPLE_LANDLORDS;
+        }
       } catch (err) {
+        console.warn('Backend loading failed. Using offline data structure.', err);
         ALL_LANDLORDS = SAMPLE_LANDLORDS;
       }
       renderLandlords(ALL_LANDLORDS);
@@ -116,6 +121,8 @@
 
     function renderLandlords(list) {
       const grid = document.getElementById('landlordsGrid');
+      if (!grid) return;
+      
       document.getElementById('landlordCount').textContent =
         `${list.length} landlord${list.length !== 1 ? 's' : ''} registered`;
 
@@ -125,7 +132,7 @@
       }
 
       grid.innerHTML = list.map((l, i) => `
-        <div class="landlord-card" onclick="openLandlord(${l.id})">
+        <div class="landlord-card" onclick="openLandlord('${l.id}')">
           <div class="landlord-avatar">${l.icon || ICONS[i % ICONS.length]}</div>
           <div class="landlord-info">
             <h3 class="landlord-name">${l.name}</h3>
@@ -151,22 +158,22 @@
     }
 
     function openLandlord(id) {
-      const l = ALL_LANDLORDS.find(x => x.id === id);
+      // Use standard non-strict loose matching string comparison to ensure database generated UUIDs/integers pair correctly
+      const l = ALL_LANDLORDS.find(x => String(x.id) === String(id));
       if (!l) return;
 
       const user  = JSON.parse(localStorage.getItem('pau_user') || 'null');
       const token = localStorage.getItem('pau_token');
 
       const contactInfo = token && user
-        ? `<div class="detail-contact-item">📞 <span>${l.phone || 'Not provided'}</span></div>
-           <div class="detail-contact-item">✉️ <span>${l.email || 'Not provided'}</span></div>`
-        : `<div style="background:#fff8ec;border:1px solid #f5a623;border-radius:8px;padding:14px;font-size:13px;color:#7a5000;margin-bottom:8px;">
-             🔒 <strong>Sign in to view contact details</strong><br/>
-             <a href="login.html" style="color:var(--pau-blue);font-weight:600;">Login here</a> or
-             <a href="register.html" style="color:var(--pau-blue);font-weight:600;">create a free account</a>.
+        ? `<div class="detail-contact-item" style="margin-bottom: 8px;">📞 <span>${l.phone || 'Not provided'}</span></div>
+           <div class="detail-contact-item" style="margin-bottom: 8px;">✉️ <span>${l.email || 'Not provided'}</span></div>`
+        : `<div style="background:#fff8ec;border:1px solid #f5a623;border-radius:8px;padding:14px;font-size:13px;color:#7a5000;margin-bottom:8px;text-align:left;">
+              🔒 <strong>Sign in to view contact details</strong><br/>
+              <a href="login.html" style="color:var(--pau-blue);font-weight:600;">Login here</a> or
+              <a href="register.html" style="color:var(--pau-blue);font-weight:600;">create a free account</a>.
            </div>`;
 
-      // Properties link — filters properties page by landlord id
       const propsUrl  = `properties.html?landlord_id=${l.id}&landlord_name=${encodeURIComponent(l.name)}`;
       const propsText = l.properties_count > 0
         ? `View ${l.properties_count} Propert${Number(l.properties_count) === 1 ? 'y' : 'ies'}`
@@ -181,7 +188,7 @@
         </div>
 
         <div style="background:var(--pau-light-bg);border-radius:10px;padding:18px;margin-bottom:20px;">
-          <p style="font-size:14px;color:var(--pau-muted);line-height:1.8;">${l.bio || 'Verified property owner near PAU campus providing quality student accommodation.'}</p>
+          <p style="font-size:14px;color:var(--pau-muted);line-height:1.8;text-align:left;">${l.bio || 'Verified property owner near PAU campus providing quality student accommodation.'}</p>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
@@ -196,10 +203,10 @@
         </div>
 
         <div style="border-top:1px solid var(--pau-border);padding-top:20px;">
-          <h4 style="font-size:13px;font-weight:600;color:var(--pau-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Contact Details</h4>
+          <h4 style="font-size:13px;font-weight:600;color:var(--pau-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;text-align:left;">Contact Details</h4>
           ${contactInfo}
           <a href="${propsUrl}" class="btn-primary"
-            style="width:100%;text-align:center;display:block;margin-top:16px;">
+            style="width:100%;text-align:center;display:block;margin-top:16px;text-decoration:none;">
             🏠 ${propsText}
           </a>
         </div>
@@ -214,12 +221,21 @@
       document.body.style.overflow = '';
     }
 
-    initHamburger();
+    // Initialize scripts on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Setup responsive hamburger action listener
+      if (typeof initHamburger === 'function') initHamburger();
+      
+      // 2. Synchronize navigation buttons with local state context
+      if (typeof updateNavbar === 'function') updateNavbar();
 
-    // Show sample data immediately, then try backend
-    ALL_LANDLORDS = SAMPLE_LANDLORDS;
-    renderLandlords(ALL_LANDLORDS);
-    loadLandlords();
+      // 3. Mount instant render fallback before background execution completes
+      ALL_LANDLORDS = SAMPLE_LANDLORDS;
+      renderLandlords(ALL_LANDLORDS);
+      
+      // 4. Fetch the real accounts from backend
+      loadLandlords();
+    });
   </script>
 </body>
 </html>
