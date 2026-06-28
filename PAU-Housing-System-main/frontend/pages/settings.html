@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="../js/accessibility.js"></script>
+</head>
+<body class="dashboard-body">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><span>🏛</span><p>PAU Housing</p></div>
+    <nav class="sidebar-nav">
+      <a href="../../index.html" class="sidebar-link"><span class="sidebar-icon">🏠</span> Home</a>
+      <a href="properties.html" class="sidebar-link"><span class="sidebar-icon">🔍</span> Properties</a>
+      <a href="landlords.html" class="sidebar-link"><span class="sidebar-icon">👥</span> Landlords</a>
+      <a href="settings.html" class="sidebar-link active"><span class="sidebar-icon">⚙️</span> Settings</a>
+    </nav>
+    <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dash-topbar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="dash-user-info">
+        <div class="dash-avatar" id="userAvatar">U</div>
+        <span id="userName">User</span>
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section-header">
+        <h1>⚙️ Settings</h1>
+        <p>Customise the appearance of PAU Housing to your preference.</p>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="settings-card">
+        <h2 class="settings-title">🎨 Appearance</h2>
+
+        <!-- Dark Mode -->
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <h3>Dark Mode</h3>
+            <p>Switch between light and dark theme.</p>
+          </div>
+          <div class="settings-row-control">
+            <div class="theme-toggle-wrap">
+              <button class="theme-btn" id="lightBtn" onclick="setTheme('light')">
+                ☀️ Light
+              </button>
+              <button class="theme-btn" id="darkBtn" onclick="setTheme('dark')">
+                🌙 Dark
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <!-- Text Size -->
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <h3>Text Size</h3>
+            <p>Increase or decrease how large text appears across the site.</p>
+          </div>
+          <div class="settings-row-control">
+            <div class="text-size-wrap">
+              <button class="text-size-btn" data-size="small"  onclick="applySize('small')">A-<span>Small</span></button>
+              <button class="text-size-btn" data-size="medium" onclick="applySize('medium')">A<span>Default</span></button>
+              <button class="text-size-btn" data-size="large"  onclick="applySize('large')">A+<span>Large</span></button>
+              <button class="text-size-btn" data-size="xlarge" onclick="applySize('xlarge')">A++<span>Extra Large</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live preview -->
+        <div class="settings-preview" id="settingsPreview">
+          <p class="preview-label">Preview</p>
+          <div class="preview-card">
+            <div class="preview-badge">Self Contain</div>
+            <p class="preview-title">Sunrise Lodge</p>
+            <p class="preview-meta">📍 Beside PAU Gate &nbsp;|&nbsp; 🚶 0.3km from PAU</p>
+            <p class="preview-price">₦350,000<span>/yr</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNT -->
+      <div class="settings-card" style="margin-top:24px;">
+        <h2 class="settings-title">👤 Account</h2>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <h3>Name</h3>
+            <p id="settingName">—</p>
+          </div>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <h3>Email</h3>
+            <p id="settingEmail">—</p>
+          </div>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <h3>Role</h3>
+            <p id="settingRole">—</p>
+          </div>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <h3>Go to Dashboard</h3>
+            <p>Return to your personal dashboard.</p>
+          </div>
+          <div class="settings-row-control">
+            <a href="#" id="dashLink" class="btn-primary" style="font-size:14px;">My Dashboard</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESET -->
+      <div class="settings-card" style="margin-top:24px;">
+        <h2 class="settings-title">🔄 Reset</h2>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <h3>Reset Appearance</h3>
+            <p>Go back to the default light theme and medium text size.</p>
+          </div>
+          <div class="settings-row-control">
+            <button class="btn-outline" onclick="resetSettings()">Reset to Default</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <style>
+    .settings-card {
+      background: white;
+      border: 1px solid var(--pau-border);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+      max-width: 800px;
+    }
+    .settings-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--pau-text);
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--pau-border);
+    }
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .settings-row-info h3 { font-size: 15px; font-weight: 600; color: var(--pau-text); margin-bottom: 4px; }
+    .settings-row-info p  { font-size: 13px; color: var(--pau-gray); }
+    .settings-divider { height: 1px; background: var(--pau-border); }
+
+    /* Theme toggle */
+    .theme-toggle-wrap { display: flex; gap: 8px; }
+    .theme-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 2px solid var(--pau-border);
+      background: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--pau-gray);
+      transition: all 0.2s;
+    }
+    .theme-btn.active { border-color: var(--pau-blue); background: var(--pau-blue); color: white; }
+
+    /* Text size */
+    .text-size-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+    .text-size-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 2px solid var(--pau-border);
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--pau-gray);
+      font-weight: 700;
+      transition: all 0.2s;
+      min-width: 72px;
+    }
+    .text-size-btn span { font-size: 10px; font-weight: 400; }
+    .text-size-btn.active { border-color: var(--pau-blue); background: #eef2ff; color: var(--pau-blue); }
+
+    /* Preview card */
+    .settings-preview {
+      margin-top: 24px;
+      background: var(--pau-light-bg);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .preview-label { font-size: 11px; font-weight: 600; color: var(--pau-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .preview-card {
+      background: white;
+      border: 1px solid var(--pau-border);
+      border-radius: 10px;
+      padding: 16px;
+      max-width: 280px;
+    }
+    .preview-badge { display: inline-block; background: #eef2ff; color: var(--pau-blue); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; margin-bottom: 8px; }
+    .preview-title { font-size: 16px; font-weight: 700; color: var(--pau-text); margin-bottom: 4px; }
+    .preview-meta  { font-size: 13px; color: var(--pau-gray); margin-bottom: 8px; }
+    .preview-price { font-size: 18px; font-weight: 700; color: var(--pau-blue); }
+    .preview-price span { font-size: 12px; font-weight: 400; color: var(--pau-gray); }
+
+    /* Dark mode overrides for settings */
+    .dark-mode .settings-card { background: #1a1f2e; border-color: #2e3650; }
+    .dark-mode .theme-btn     { background: #1a1f2e; border-color: #2e3650; color: #9aa3b8; }
+    .dark-mode .text-size-btn { background: #1a1f2e; border-color: #2e3650; color: #9aa3b8; }
+    .dark-mode .preview-card  { background: #13171f; border-color: #2e3650; }
+    .dark-mode .settings-preview { background: #13171f; }
+  </style>
+
+  <script>
+    // Load user info
+    const user = JSON.parse(localStorage.getItem('pau_user') || '{}');
+    if (user.name) {
+      const initials = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('userName').textContent   = user.name;
+      document.getElementById('settingName').textContent  = user.name;
+      document.getElementById('settingEmail').textContent = user.email;
+      document.getElementById('settingRole').textContent  = user.role === 'landlord' ? '🏠 Property Owner' : '🎓 Student';
+      document.getElementById('dashLink').href = user.role === 'landlord' ? 'owner-dashboard.html' : 'student-dashboard.html';
+    }
+
+    // Sync button states on load
+    function syncButtons() {
+      const dark = localStorage.getItem('pau_darkmode') === 'true';
+      const size = localStorage.getItem('pau_textsize') || 'medium';
+
+      document.getElementById('lightBtn').classList.toggle('active', !dark);
+      document.getElementById('darkBtn').classList.toggle('active', dark);
+
+      document.querySelectorAll('.text-size-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.size === size);
+      });
+    }
+
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        localStorage.setItem('pau_darkmode', 'true');
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+        localStorage.setItem('pau_darkmode', 'false');
+      }
+      syncButtons();
+    }
+
+    function applySize(size) {
+      document.documentElement.setAttribute('data-size', size);
+      localStorage.setItem('pau_textsize', size);
+      syncButtons();
+    }
+
+    function resetSettings() {
+      setTheme('light');
+      applySize('medium');
+      syncButtons();
+    }
+
+    function logout() {
+      localStorage.removeItem('pau_token');
+      localStorage.removeItem('pau_user');
+      window.location.href = 'login.html';
+    }
+
+    syncButtons();
+
+    document.getElementById('hamburger') &&
+      document.getElementById('hamburger').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+      });
+  </script>
+</body>
+</html>
