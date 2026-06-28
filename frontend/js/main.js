@@ -49,17 +49,13 @@ function getImg(roomType) {
 // NAVBAR
 // ==========================================
 function updateNavbar() {
-  // Prevent running more than once per page load
-  if (window._navUpdated) return;
-  window._navUpdated = true;
-
   const user  = JSON.parse(localStorage.getItem('pau_user') || 'null');
   const token = localStorage.getItem('pau_token');
   const nav   = document.getElementById('navLinks');
   if (!nav) return;
 
   if (token && user) {
-    // Remove landlord-irrelevant links
+    // 1. Remove landlord-irrelevant links
     if (user.role === 'landlord') {
       nav.querySelectorAll('li').forEach(li => {
         const a = li.querySelector('a');
@@ -69,7 +65,7 @@ function updateNavbar() {
       });
     }
 
-    // Remove login and signup links
+    // 2. Remove standard login and signup links
     nav.querySelectorAll('li').forEach(li => {
       const a = li.querySelector('a');
       if (a && (a.href.includes('login.html') || a.href.includes('register.html'))) {
@@ -77,21 +73,31 @@ function updateNavbar() {
       }
     });
 
-    // Remove any previously added dashboard/logout links to prevent duplicates
+    // 3. Remove any previously added profile/logout links to prevent duplicates
     nav.querySelectorAll('li.nav-user-item').forEach(li => li.remove());
 
-    // Add dashboard link
+    // 4. Figure out path layout based on current page location
+    const isIndexPage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/';
+    const pathPrefix = isIndexPage ? 'frontend/pages/' : '';
+
+    // 5. Add dynamic dashboard link
     const dashUrl = user.role === 'landlord' ? 'owner-dashboard.html' : 'student-dashboard.html';
     const dashLi  = document.createElement('li');
     dashLi.className = 'nav-user-item';
-    dashLi.innerHTML = `<a href="${dashUrl}" class="btn-nav">👤 ${user.name.split(' ')[0]}</a>`;
+    dashLi.innerHTML = `<a href="${pathPrefix}${dashUrl}" class="btn-nav">👤 ${user.name.split(' ')[0]}</a>`;
     nav.appendChild(dashLi);
 
-    // Add logout link
+    // 6. Add dynamic logout link
     const logoutLi = document.createElement('li');
     logoutLi.className = 'nav-user-item';
-    logoutLi.innerHTML = `<a href="#" class="btn-nav-outline" onclick="logoutUser(event)">Logout</a>`;
+    logoutLi.innerHTML = `<a href="#" class="btn-nav-outline" id="globalLogoutBtn">Sign Out</a>`;
     nav.appendChild(logoutLi);
+
+    // Attach click event safely
+    document.getElementById('globalLogoutBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      logoutUser(e);
+    });
   }
 }
 
@@ -99,7 +105,7 @@ function logoutUser(e) {
   e && e.preventDefault();
   localStorage.removeItem('pau_token');
   localStorage.removeItem('pau_user');
-  window.location.href = 'index.html';
+  window.location.href = window.location.pathname.includes('pages/') ? '../../index.html' : 'index.html';
 }
 
 // ==========================================
@@ -143,7 +149,7 @@ function makeCard(p, index) {
     ? `${_API.replace('/api', '')}${p.image_url}`
     : getImg(p.room_type);
   return `
-    <div class="property-card" onclick="window.location.href='property-detail.html?id=${p.id}'">
+    <div class="property-card" onclick="window.location.href='frontend/pages/property-detail.html?id=${p.id}'">
       <div class="property-img-wrap">
         <img src="${img}" alt="${p.name}"
           onerror="this.src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&q=80'"/>
@@ -156,7 +162,7 @@ function makeCard(p, index) {
         <p class="property-meta">📍 ${p.address} &nbsp;|&nbsp; 🚶 ${p.distance_from_school || '?'}km from PAU</p>
         <div class="property-footer">
           <div class="property-price">&#8358;${Number(p.rent).toLocaleString()} <span>/yr</span></div>
-          <a class="btn-details" href="property-detail.html?id=${p.id}">View Details</a>
+          <a class="btn-details" href="frontend/pages/property-detail.html?id=${p.id}">View Details</a>
         </div>
       </div>
     </div>`;
@@ -165,9 +171,9 @@ function makeCard(p, index) {
 function getSampleCards() {
   const s = [
     { id:1, name:'Sunrise Lodge',    address:'Beside PAU Gate, Ibeju-Lekki', rent:350000, room_type:'self-contain', distance_from_school:0.3 },
-    { id:2, name:'Grace Apartment',  address:'Abraham Adesanya, Ajah',        rent:280000, room_type:'shared',       distance_from_school:0.8 },
-    { id:3, name:'Royal Chambers',   address:'Bogije, Ibeju-Lekki',           rent:480000, room_type:'flat',         distance_from_school:1.2 },
-    { id:4, name:'Palm View Hostel', address:'Lakowe Estate',                  rent:220000, room_type:'single',       distance_from_school:2.0 },
+    { id:2, name:'Grace Apartment',  address:'Abraham Adesanya, Ajah',        rent:280000, room_type:'shared',        distance_from_school:0.8 },
+    { id:3, name:'Royal Chambers',   address:'Bogije, Ibeju-Lekki',           rent:480000, room_type:'flat',          distance_from_school:1.2 },
+    { id:4, name:'Palm View Hostel', address:'Lakowe Estate',                  rent:220000, room_type:'single',        distance_from_school:2.0 },
     { id:5, name:'Lekki Gardens',    address:'Ibeju-Lekki Town',              rent:400000, room_type:'self-contain', distance_from_school:0.6 },
     { id:6, name:'Ambassador Lodge', address:'Beside PAU Road',               rent:380000, room_type:'self-contain', distance_from_school:0.4 },
   ];
@@ -182,7 +188,7 @@ function saveProperty(p) {
   if (!token) {
     const g = document.getElementById('authGuard');
     if (g) { g.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-    else window.location.href = 'login.html';
+    else window.location.href = 'frontend/pages/login.html';
     return;
   }
   let saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
@@ -203,7 +209,7 @@ function searchProperties() {
   if (name)    params.append('name', name);
   if (type)    params.append('room_type', type);
   if (maxRent) params.append('max_rent', maxRent);
-  window.location.href = `properties.html?${params.toString()}`;
+  window.location.href = `frontend/pages/properties.html?${params.toString()}`;
 }
 
 // ==========================================
