@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="../js/accessibility.js"></script>
+  <script src="../js/toast.js"></script>
+</head>
+<body class="dashboard-body">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><span>🏛</span><p>PAU Housing</p></div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" onclick="showSection('saved',event)"><span class="sidebar-icon">💾</span> Saved Properties</a>
+      <a href="#" class="sidebar-link" onclick="showSection('profile',event)"><span class="sidebar-icon">👤</span> My Profile</a>
+      <a href="properties.html" class="sidebar-link"><span class="sidebar-icon">🔍</span> Browse Properties</a>
+      <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+      <a href="../../index.html" class="sidebar-link"><span class="sidebar-icon">🏠</span> Back to Home</a>
+    </nav>
+    <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dash-topbar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="dash-user-info">
+        <div class="dash-avatar" id="userAvatar">ST</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--pau-text)" id="userName">Student</div>
+          <div style="font-size:11px;color:var(--pau-blue);font-weight:600">🎓 Student Account</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVED PROPERTIES -->
+    <section class="dash-section" id="section-saved">
+      <div class="dash-section-header">
+        <h1>💾 Saved Properties</h1>
+        <p>Properties you have bookmarked while browsing.</p>
+      </div>
+      <div class="dash-stats-row">
+        <div class="dash-stat-card"><span class="ds-num" id="savedCount">0</span><span class="ds-label">Saved Listings</span></div>
+        <div class="dash-stat-card"><span class="ds-num" id="avgRentStat">₦0</span><span class="ds-label">Avg. Rent</span></div>
+        <div class="dash-stat-card"><span class="ds-num" id="selfContainStat">0</span><span class="ds-label">Self Contain</span></div>
+      </div>
+      <div class="properties-grid" id="savedGrid">
+        <div class="empty-state">
+          <p>📭 No saved properties yet.</p>
+          <a href="properties.html" class="btn-primary" style="margin-top:16px;display:inline-block">Browse Properties</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="dash-section" id="section-profile" style="display:none">
+      <div class="dash-section-header">
+        <h1>👤 My Profile</h1>
+        <p>Your personal information.</p>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar-big" id="profileAvatarBig">ST</div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="profileName"/>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <!-- Fixed: visible in dark mode with explicit styling -->
+          <input type="email" id="profileEmail" readonly
+            style="cursor:not-allowed; opacity:1; color:var(--pau-text);
+                   background:var(--pau-light-bg); border-color:var(--pau-border);"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="profilePhone" placeholder="Your phone number"/>
+        </div>
+        <div class="form-group">
+          <label>New Password <span style="font-weight:400;color:var(--pau-gray)">(leave blank to keep current)</span></label>
+          <input type="password" id="profilePass" placeholder="Enter new password"/>
+        </div>
+        <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const user  = JSON.parse(localStorage.getItem('pau_user') || '{}');
+    const token = localStorage.getItem('pau_token');
+    if (!token) window.location.href = 'login.html';
+
+    if (user.name) {
+      const init = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('userAvatar').textContent       = init;
+      document.getElementById('profileAvatarBig').textContent = init;
+      document.getElementById('userName').textContent         = user.name;
+      document.getElementById('profileName').value            = user.name;
+      document.getElementById('profileEmail').value           = user.email;
+      document.getElementById('profilePhone').value           = user.phone || '';
+    }
+
+    function showSection(name, e) {
+      document.querySelectorAll('.dash-section').forEach(s => s.style.display='none');
+      document.getElementById('section-'+name).style.display = 'block';
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      if (e && e.target) {
+        const l = e.target.closest('.sidebar-link');
+        if (l) l.classList.add('active');
+      }
+    }
+
+    function loadSaved() {
+      const saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
+      const grid  = document.getElementById('savedGrid');
+
+      document.getElementById('savedCount').textContent = saved.length;
+
+      if (!saved.length) {
+        grid.innerHTML = `<div class="empty-state">
+          <p>📭 No saved properties yet.</p>
+          <a href="properties.html" class="btn-primary" style="margin-top:16px;display:inline-block">Browse Properties</a>
+        </div>`;
+        document.getElementById('avgRentStat').textContent    = '₦0';
+        document.getElementById('selfContainStat').textContent = '0';
+        return;
+      }
+
+      const avg       = Math.round(saved.reduce((s,p)=>s+Number(p.rent),0)/saved.length);
+      const selfCount = saved.filter(p=>(p.room_type||'').toLowerCase().includes('self')).length;
+      document.getElementById('avgRentStat').textContent    = '₦' + avg.toLocaleString();
+      document.getElementById('selfContainStat').textContent = selfCount;
+
+      grid.innerHTML = saved.map(p => {
+        const img = (p.room_type||'').toLowerCase().includes('self')
+          ? '../images/self-contained1.jpg'
+          : (p.image_url ? `http://localhost:3000${p.image_url}` : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&q=70');
+        return `
+          <div class="property-card">
+            <div class="property-img-wrap">
+              <img src="${img}" alt="${p.name}"
+                onerror="this.src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&q=70'"/>
+            </div>
+            <div class="property-body">
+              <span class="property-badge">${p.room_type||'Room'}</span>
+              <p class="property-name">${p.name}</p>
+              <p class="property-meta">📍 ${p.address} &nbsp;|&nbsp; 🚶 ${p.distance_from_school||'?'}km</p>
+              <div class="property-footer">
+                <div class="property-price">₦${Number(p.rent).toLocaleString()} <span>/yr</span></div>
+                <button class="btn-remove" onclick="confirmRemove(${p.id},'${p.name.replace(/'/g,"\\'")}')">Remove</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Nice confirm popup before removing saved property
+    function confirmRemove(id, name) {
+      showConfirm(
+        `Remove "${name}"?`,
+        'This property will be removed from your saved list. You can save it again from the Properties page.',
+        () => {
+          let saved = JSON.parse(localStorage.getItem('pau_saved') || '[]');
+          saved = saved.filter(p => p.id !== id);
+          localStorage.setItem('pau_saved', JSON.stringify(saved));
+          showToast(`"${name}" removed from saved properties.`, 'info');
+          loadSaved();
+        }
+      );
+    }
+
+    function saveProfile() {
+      showToast('Profile saved successfully!', 'success');
+    }
+
+    function logout() {
+      localStorage.removeItem('pau_token');
+      localStorage.removeItem('pau_user');
+      window.location.href = 'login.html';
+    }
+
+    loadSaved();
+  </script>
+</body>
+</html>

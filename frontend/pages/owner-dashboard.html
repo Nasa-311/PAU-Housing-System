@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Owner Dashboard — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="../js/accessibility.js"></script>
+  <script src="../js/toast.js"></script>
+  <style>
+    /* Owner-specific banner */
+    .owner-hero-banner {
+      background: linear-gradient(135deg, var(--pau-blue-dark) 0%, var(--pau-blue) 100%);
+      padding: 28px 32px 0;
+      border-bottom: 3px solid var(--pau-accent);
+    }
+    .owner-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,166,35,0.2); border: 1px solid rgba(245,166,35,0.5);
+      color: var(--pau-accent); font-size: 12px; font-weight: 700;
+      padding: 5px 14px; border-radius: 100px; margin-bottom: 14px;
+    }
+    .owner-welcome { font-family:'Playfair Display',serif; font-size:24px; color:white; margin-bottom:4px; }
+    .owner-sub { color:rgba(255,255,255,0.72); font-size:14px; margin-bottom:20px; }
+    .owner-hero-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+    .owner-tab {
+      padding:10px 18px; border:none; background:rgba(255,255,255,0.12);
+      color:rgba(255,255,255,0.75); font-size:14px; font-weight:600;
+      cursor:pointer; font-family:'DM Sans',sans-serif;
+      border-radius:8px 8px 0 0; transition:all 0.2s;
+    }
+    .owner-tab:hover { background:rgba(255,255,255,0.22); color:white; }
+    .owner-tab.active { background:var(--pau-white); color:var(--pau-blue-dark); }
+
+    /* Gold stat cards */
+    .dash-stat-card.gold-top { border-top:3px solid var(--pau-accent); }
+    .dash-stat-card.gold-top .ds-num { color:var(--pau-accent); }
+
+    /* Listing row — FIXED so rent doesn't overflow */
+    .listing-row {
+      background: white;
+      border: 1px solid var(--pau-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 76px 1fr auto auto auto;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+    }
+    .listing-row:hover { border-color:var(--pau-blue); }
+    .listing-thumb {
+      width:76px; height:76px; border-radius:10px;
+      object-fit:cover; background:var(--pau-light-bg); flex-shrink:0;
+    }
+    .listing-info { min-width:0; }
+    .listing-badge {
+      display:inline-block; background:#eef2ff; color:var(--pau-blue);
+      font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px;
+      margin-bottom:5px; text-transform:capitalize;
+    }
+    .listing-name { font-size:15px; font-weight:700; color:var(--pau-text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .listing-meta { font-size:12px; color:var(--pau-gray); }
+    .listing-rent {
+      font-size:15px; font-weight:700; color:var(--pau-blue);
+      white-space:nowrap; min-width:0;
+    }
+    .listing-rent span { font-size:11px; font-weight:400; color:var(--pau-gray); display:block; }
+    .listing-status { font-size:12px; font-weight:600; white-space:nowrap; }
+    .status-yes { color:#059669; }
+    .status-no  { color:#dc2626; }
+    .listing-actions { display:flex; gap:8px; }
+
+    /* Upload area */
+    .upload-zone {
+      border:2px dashed var(--pau-border); border-radius:var(--radius-md);
+      padding:28px; text-align:center; cursor:pointer; transition:var(--transition);
+      background:var(--pau-light-bg);
+    }
+    .upload-zone:hover { border-color:var(--pau-blue); background:#eef2ff; }
+
+    /* Messages */
+    .msg-row {
+      background:white; border:1px solid var(--pau-border);
+      border-radius:var(--radius-md); padding:20px 24px;
+      margin-bottom:12px; box-shadow:var(--shadow-card);
+    }
+    .msg-row.unread { border-left:4px solid var(--pau-accent); }
+    .msg-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .msg-who { display:flex; align-items:center; gap:12px; }
+    .msg-av  { width:40px;height:40px;border-radius:50%;background:var(--pau-blue);color:white;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center; }
+    .msg-name { font-size:15px;font-weight:700;color:var(--pau-text);margin-bottom:2px; }
+    .msg-contact { font-size:12px;color:var(--pau-gray); }
+    .msg-prop-tag { background:rgba(245,166,35,0.12);color:#7a5000;font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px; }
+    .msg-body { background:var(--pau-light-bg);border-radius:8px;padding:12px 16px;font-size:14px;color:var(--pau-text);line-height:1.7;margin-bottom:12px; }
+    .msg-acts { display:flex;gap:8px; }
+
+    /* Dark mode */
+    .dark-mode .owner-hero-banner { background:linear-gradient(135deg,#060c1a,#0c1e40); }
+    .dark-mode .owner-tab.active  { background:#1c2236; color:#d8e0f0; }
+    .dark-mode .listing-row       { background:#1c2236; border-color:#263050; }
+    .dark-mode .listing-row:hover { border-color:#4f86e8; }
+    .dark-mode .listing-name      { color:#d8e0f0; }
+    .dark-mode .listing-meta      { color:#6b7fa8; }
+    .dark-mode .listing-badge     { background:rgba(79,134,232,0.15); color:#4f86e8; }
+    .dark-mode .listing-rent      { color:#4f86e8; }
+    .dark-mode .upload-zone       { background:#13182a; border-color:#263050; }
+    .dark-mode .upload-zone:hover { border-color:#4f86e8; background:rgba(79,134,232,0.05); }
+    .dark-mode .msg-row           { background:#1c2236; border-color:#263050; }
+    .dark-mode .msg-row.unread    { border-left-color:var(--pau-accent); }
+    .dark-mode .msg-name          { color:#d8e0f0; }
+    .dark-mode .msg-prop-tag      { background:rgba(245,166,35,0.1); color:#f5a623; }
+    .dark-mode .msg-body          { background:#13182a; color:#d8e0f0; }
+    .dark-mode .dash-stat-card    { background:#1c2236; border-color:#263050; }
+
+    @media (max-width: 700px) {
+      .listing-row { grid-template-columns: 60px 1fr; }
+      .listing-rent, .listing-status, .listing-actions { grid-column: 2; }
+    }
+  </style>
+</head>
+<body class="dashboard-body">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><span>🏛</span><p>PAU Housing</p></div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" onclick="showTab('listings',this)"><span class="sidebar-icon">🏠</span> My Listings</a>
+      <a href="#" class="sidebar-link" onclick="showTab('add',this)"><span class="sidebar-icon">➕</span> Add Property</a>
+      <a href="#" class="sidebar-link" onclick="showTab('messages',this)"><span class="sidebar-icon">💬</span> Messages <span class="msg-badge" id="msgBadge" style="display:none">0</span></a>
+      <a href="#" class="sidebar-link" onclick="showTab('profile',this)"><span class="sidebar-icon">👤</span> My Profile</a>
+      <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+    </nav>
+    <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dash-topbar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="dash-user-info">
+        <div class="dash-avatar owner-avatar" id="userAvatar">OW</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--pau-text)" id="userName">Owner</div>
+          <div style="font-size:11px;color:var(--pau-accent);font-weight:700">🏠 Property Owner</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO BANNER -->
+    <div class="owner-hero-banner">
+      <div class="owner-badge">🏠 Property Owner Portal</div>
+      <p class="owner-welcome" id="welcomeName">Welcome back</p>
+      <p class="owner-sub">Manage your listings, view student enquiries and track your properties.</p>
+      <div class="owner-hero-tabs">
+        <button class="owner-tab active" onclick="showTab('listings',null)">My Listings</button>
+        <button class="owner-tab" onclick="showTab('add',null)">Add Property</button>
+        <button class="owner-tab" onclick="showTab('messages',null)">Messages</button>
+        <button class="owner-tab" onclick="showTab('profile',null)">Profile</button>
+      </div>
+    </div>
+
+    <!-- LISTINGS -->
+    <section class="dash-section" id="tab-listings">
+      <div class="dash-section-header">
+        <h1>My Property Listings</h1>
+        <p>All properties you have listed on PAU Housing.</p>
+      </div>
+      <div class="dash-stats-row">
+        <div class="dash-stat-card"><span class="ds-num" id="totalCount">0</span><span class="ds-label">Total Listings</span></div>
+        <div class="dash-stat-card gold-top"><span class="ds-num" id="availCount">0</span><span class="ds-label">Available Now</span></div>
+        <div class="dash-stat-card"><span class="ds-num" id="avgRent">₦0</span><span class="ds-label">Avg. Annual Rent</span></div>
+        <div class="dash-stat-card gold-top"><span class="ds-num" id="msgCount">0</span><span class="ds-label">Messages</span></div>
+      </div>
+      <div style="margin-bottom:20px">
+        <button class="btn-primary" onclick="showTab('add',null)">+ Add New Property</button>
+      </div>
+      <div id="listingsContainer">
+        <div class="empty-state"><p>📋 No listings yet. Add your first property!</p></div>
+      </div>
+    </section>
+
+    <!-- ADD PROPERTY -->
+    <section class="dash-section" id="tab-add" style="display:none">
+      <div class="dash-section-header">
+        <h1>Add New Property</h1>
+        <p>Fill in the details and upload images. Your listing will be visible to students immediately.</p>
+      </div>
+      <div class="add-property-form">
+        <div class="form-row">
+          <div class="form-group"><label>Property Name *</label><input type="text" id="propName" placeholder="e.g. Sunrise Lodge"/></div>
+          <div class="form-group"><label>Address *</label><input type="text" id="propAddress" placeholder="e.g. Beside PAU Gate, Ibeju-Lekki"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Room Type *</label>
+            <select id="propType">
+              <option value="">Select type</option>
+              <option value="single">Single Room</option>
+              <option value="shared">Shared Room</option>
+              <option value="self-contain">Self Contain</option>
+              <option value="flat">Flat</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Annual Rent (₦) *</label><input type="number" id="propRent" placeholder="e.g. 350000" step="10000"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Distance from PAU (km)</label><input type="number" id="propDist" placeholder="e.g. 0.5" step="0.1"/></div>
+          <div class="form-group"><label>Availability</label>
+            <select id="propAvail"><option value="true">Available</option><option value="false">Not Available</option></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="propDesc" rows="4" placeholder="Describe amenities, security, water, electricity, distance to PAU gate..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Property Images (up to 5 photos)</label>
+          <div class="upload-zone" onclick="document.getElementById('propImgs').click()">
+            <div style="font-size:36px;margin-bottom:10px">📷</div>
+            <p id="uploadLabel" style="font-size:15px;font-weight:600;color:var(--pau-text);margin-bottom:4px">Click to upload photos</p>
+            <p style="font-size:12px;color:var(--pau-gray)">JPG or PNG — up to 5 images</p>
+            <input type="file" id="propImgs" multiple accept="image/*" style="display:none" onchange="previewImgs(this)"/>
+          </div>
+          <div id="imgPreviews" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"></div>
+        </div>
+        <div id="addError"   class="auth-error"   style="display:none"></div>
+        <div id="addSuccess" class="auth-success" style="display:none"></div>
+        <button class="btn-primary" onclick="submitProperty()">Submit Listing</button>
+      </div>
+    </section>
+
+    <!-- MESSAGES -->
+    <section class="dash-section" id="tab-messages" style="display:none">
+      <div class="dash-section-header">
+        <h1>Student Messages</h1>
+        <p>Enquiries sent by students about your properties.</p>
+      </div>
+      <div id="messagesContainer"><div class="empty-state"><p>📭 No messages yet.</p></div></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="dash-section" id="tab-profile" style="display:none">
+      <div class="dash-section-header">
+        <h1>My Profile</h1>
+        <p>Your contact details visible to students on your listings.</p>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar-big owner-avatar" id="profileAvatar">OW</div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="profileName"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="profileEmail" readonly style="opacity:0.6;cursor:not-allowed"/></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="profilePhone" placeholder="e.g. 08012345678"/></div>
+        <div class="form-group"><label>Bio</label><textarea id="profileBio" rows="3" placeholder="Tell students about yourself as a landlord..."></textarea></div>
+        <button class="btn-primary" onclick="showToast('Profile saved successfully!','success')">Save Changes</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API   = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/api'
+      : 'https://pau-housing-system.onrender.com/api';
+    const user  = JSON.parse(localStorage.getItem('pau_user') || '{}');
+    const token = localStorage.getItem('pau_token');
+
+    if (!token) window.location.href = 'login.html';
+
+    if (user.name) {
+      const init = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('userAvatar').textContent    = init;
+      document.getElementById('userName').textContent      = user.name;
+      document.getElementById('welcomeName').textContent   = 'Welcome back, ' + user.name.split(' ')[0];
+      document.getElementById('profileAvatar').textContent = init;
+      document.getElementById('profileName').value         = user.name;
+      document.getElementById('profileEmail').value        = user.email;
+      document.getElementById('profilePhone').value        = user.phone || '';
+    }
+
+    // --- Section switching ---
+    function showTab(name, el) {
+      document.querySelectorAll('.dash-section').forEach(s => s.style.display='none');
+      document.getElementById('tab-' + name).style.display = 'block';
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.owner-tab').forEach(t => t.classList.remove('active'));
+      if (el) el.classList.add('active');
+      if (name === 'messages') loadMessages();
+    }
+
+    // --- Load listings ---
+    // Tries backend first using landlord_id filter
+    async function loadListings() {
+      try {
+        let data = [];
+        if (user.landlord_id) {
+          const res = await fetch(`${API}/properties?landlord_id=${user.landlord_id}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          data = await res.json();
+        }
+        // Also try my-properties endpoint
+        if (!data.length) {
+          const res2 = await fetch(`${API}/my-properties`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          data = await res2.json();
+        }
+        renderListings(data);
+      } catch {
+        renderListings([]);
+      }
+    }
+
+    function renderListings(list) {
+      document.getElementById('totalCount').textContent = list.length;
+      document.getElementById('availCount').textContent = list.filter(p=>p.available).length;
+      if (list.length) {
+        const avg = Math.round(list.reduce((s,p)=>s+Number(p.rent),0)/list.length);
+        document.getElementById('avgRent').textContent = '₦' + avg.toLocaleString();
+      } else {
+        document.getElementById('avgRent').textContent = '₦0';
+      }
+
+      const c = document.getElementById('listingsContainer');
+      if (!list.length) {
+        c.innerHTML = `<div class="empty-state"><p>📋 No listings yet. Add your first property!</p><button class="btn-primary" onclick="showTab('add',null)" style="margin-top:16px">+ Add Property</button></div>`;
+        return;
+      }
+
+      c.innerHTML = list.map(p => {
+        const imgSrc = p.image_url
+          ? `http://localhost:3000${p.image_url}`
+          : ((p.room_type||'').toLowerCase().includes('self')
+              ? '../images/self-contained1.jpg'
+              : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=150&q=70');
+        return `
+          <div class="listing-row">
+            <img class="listing-thumb" src="${imgSrc}" alt="${p.name}"
+              onerror="this.src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=150&q=70'"/>
+            <div class="listing-info">
+              <div class="listing-badge">${p.room_type}</div>
+              <div class="listing-name">${p.name}</div>
+              <div class="listing-meta">📍 ${p.address} &nbsp;|&nbsp; 🚶 ${p.distance_from_school}km from PAU</div>
+            </div>
+            <div class="listing-rent">
+              ₦${Number(p.rent).toLocaleString()}
+              <span>/yr</span>
+            </div>
+            <div class="listing-status ${p.available?'status-yes':'status-no'}">
+              ${p.available ? '✅ Available' : '❌ Unavailable'}
+            </div>
+            <div class="listing-actions">
+              <button class="btn-sm-delete" onclick="deleteProp(${p.id},'${p.name}')">Delete</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // --- Delete property with nice confirm popup ---
+    function deleteProp(id, name) {
+      showConfirm(
+        `Delete "${name}"?`,
+        'This will permanently remove this listing. Students will no longer be able to see it.',
+        async () => {
+          try {
+            const res = await fetch(`${API}/properties/${id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+              showToast(`"${name}" has been deleted.`, 'success');
+              loadListings();
+            } else {
+              showToast('Failed to delete. Try again.', 'error');
+            }
+          } catch {
+            showToast('Cannot reach server. Make sure backend is running.', 'error');
+          }
+        }
+      );
+    }
+
+    // --- Image preview ---
+    function previewImgs(input) {
+      const prev = document.getElementById('imgPreviews');
+      prev.innerHTML = '';
+      Array.from(input.files).slice(0,5).forEach(file => {
+        const r = new FileReader();
+        r.onload = e => {
+          prev.innerHTML += `<div style="width:80px;height:80px;border-radius:8px;overflow:hidden;border:2px solid var(--pau-border)">
+            <img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover"/></div>`;
+        };
+        r.readAsDataURL(file);
+      });
+      document.getElementById('uploadLabel').textContent = `${Math.min(input.files.length,5)} image(s) selected`;
+    }
+
+    // --- Submit property ---
+    async function submitProperty() {
+      const name    = document.getElementById('propName').value.trim();
+      const address = document.getElementById('propAddress').value.trim();
+      const type    = document.getElementById('propType').value;
+      const rent    = document.getElementById('propRent').value;
+      const dist    = document.getElementById('propDist').value;
+      const avail   = document.getElementById('propAvail').value;
+      const desc    = document.getElementById('propDesc').value.trim();
+      const errEl   = document.getElementById('addError');
+      const succEl  = document.getElementById('addSuccess');
+      errEl.style.display = succEl.style.display = 'none';
+
+      if (!name || !address || !type || !rent) {
+        errEl.style.display = 'block';
+        errEl.textContent   = 'Please fill in all required fields (Name, Address, Type, Rent).';
+        return;
+      }
+      if (!user.landlord_id) {
+        errEl.style.display = 'block';
+        errEl.textContent   = 'Your account is not linked as a landlord. Please register again as a landlord.';
+        return;
+      }
+
+      try {
+        const fd = new FormData();
+        fd.append('name', name);
+        fd.append('address', address);
+        fd.append('room_type', type);
+        fd.append('rent', rent);
+        fd.append('distance_from_school', dist || 0);
+        fd.append('available', avail);
+        fd.append('description', desc);
+        fd.append('landlord_id', user.landlord_id);
+
+        const files = document.getElementById('propImgs').files;
+        for (let i = 0; i < Math.min(files.length, 5); i++) fd.append('images', files[i]);
+
+        const res  = await fetch(`${API}/properties`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: fd
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showToast('Property listed successfully! Students can now see it.', 'success');
+          ['propName','propAddress','propRent','propDesc'].forEach(id => document.getElementById(id).value='');
+          document.getElementById('propImgs').value = '';
+          document.getElementById('imgPreviews').innerHTML = '';
+          document.getElementById('uploadLabel').textContent = 'Click to upload photos';
+          document.getElementById('propType').value  = '';
+          document.getElementById('propAvail').value = 'true';
+          loadListings();
+          setTimeout(() => showTab('listings', null), 2000);
+        } else {
+          errEl.style.display = 'block';
+          errEl.textContent   = data.error || 'Failed. Make sure backend is running.';
+        }
+      } catch {
+        errEl.style.display = 'block';
+        errEl.textContent   = 'Cannot reach server. Run: node server.js in your terminal.';
+      }
+    }
+
+    // --- Load messages ---
+    async function loadMessages() {
+      const c = document.getElementById('messagesContainer');
+      if (!user.landlord_id) {
+        c.innerHTML = `<div class="empty-state"><p>Landlord profile not linked. Re-register as a landlord.</p></div>`;
+        return;
+      }
+      try {
+        const res  = await fetch(`${API}/messages/landlord/${user.landlord_id}`);
+        const data = await res.json();
+        const unread = data.filter(m => !m.is_read).length;
+        document.getElementById('msgCount').textContent = data.length;
+        if (unread > 0) {
+          document.getElementById('msgBadge').style.display = 'inline-flex';
+          document.getElementById('msgBadge').textContent   = unread;
+        }
+        if (!data.length) { c.innerHTML = `<div class="empty-state"><p>📭 No messages yet. Students will contact you here when they are interested in your properties.</p></div>`; return; }
+        c.innerHTML = data.map(m => `
+          <div class="msg-row ${m.is_read?'':'unread'}">
+            <div class="msg-top">
+              <div class="msg-who">
+                <div class="msg-av">${(m.student_name||'S')[0]}</div>
+                <div>
+                  <div class="msg-name">${m.student_name||'Student'}</div>
+                  <div class="msg-contact">📞 ${m.student_phone||'N/A'} &nbsp;|&nbsp; ✉️ ${m.student_email||'N/A'}</div>
+                </div>
+              </div>
+              <span class="msg-prop-tag">🏠 ${m.property_name||'General Enquiry'}</span>
+            </div>
+            <div class="msg-body">${m.message}</div>
+            <div class="msg-acts">
+              <a href="tel:${m.student_phone}" class="btn-sm-edit">📞 Call Student</a>
+              <a href="mailto:${m.student_email}" class="btn-sm-edit">✉️ Reply by Email</a>
+            </div>
+          </div>`).join('');
+      } catch {
+        c.innerHTML = `<div class="empty-state"><p>Start the backend server to load messages.</p></div>`;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('pau_token');
+      localStorage.removeItem('pau_user');
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('sidebar') &&
+      document.querySelector('.sidebar-toggle') &&
+      document.querySelector('.sidebar-toggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+      });
+
+    loadListings();
+  </script>
+</body>
+</html>
