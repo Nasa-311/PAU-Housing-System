@@ -12,7 +12,33 @@ const pool = require('./db');
 const { initializeDatabase } = require('./init-db');
 const app  = express();
 
-app.use(cors({ origin: '*' }));
+// ==========================================
+// ROBUST CORS POLICY SETUP 
+// Allows cross-origin handling even with custom Authorization headers across environments
+// ==========================================
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'https://pau-housing-system.onrender.com' // Production link fallback
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://192.168.')) {
+      return callback(null, true);
+    }
+    // Fallback wrapper to make local testing less strict
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -211,6 +237,23 @@ app.post('/api/properties', upload.array('images', 5), async (req, res) => {
   }
 });
 
+app.post('/api/properties', upload.array('images', 5), async (req, res) => {
+  const { name, address, room_type, rent, distance_from_school, available, description, landlord_id } = req.body;
+  const imageUrl = req.files && req.files.length > 0 ? `/uploads/${req.files[0].filename}` : null;
+  try {
+    const r = await pool.query(
+      `INSERT INTO properties (name,address,room_type,rent,distance_from_school,available,description,landlord_id,image_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [name, address, room_type, Number(rent), Number(distance_from_school || 0),
+       available !== 'false', description || '', landlord_id || null, imageUrl]
+    );
+    res.status(201).json(r.rows[0]);
+  } catch (err) {
+    console.error('Add property error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/properties/:id', async (req, res) => {
   try {
     await pool.query('DELETE FROM properties WHERE id=$1', [req.params.id]);
@@ -239,7 +282,6 @@ app.get('/api/my-properties', async (req, res) => {
 // ==========================================
 app.get('/api/landlords', async (req, res) => {
   try {
-    // Count only properties that actually belong to each landlord
     const r = await pool.query(
       `SELECT l.*, COUNT(p.id)::int AS properties_count
        FROM landlords l
