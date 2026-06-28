@@ -258,7 +258,7 @@ function initHamburger() {
   const navLinks  = document.getElementById('navLinks');
   if (!hamburger || !navLinks) return;
 
-  // Create backdrop overlay
+  // Create backdrop overlay (only once)
   let backdrop = document.getElementById('menu-backdrop');
   if (!backdrop) {
     backdrop = document.createElement('div');
@@ -270,10 +270,18 @@ function initHamburger() {
       background: rgba(0,0,0,0.4);
       z-index: 998;
       backdrop-filter: blur(2px);
+      cursor: pointer;
     `;
     document.body.appendChild(backdrop);
   }
 
+  // Close menu function
+  function closeMenu() {
+    navLinks.classList.remove('open');
+    backdrop.style.display = 'none';
+  }
+
+  // Hamburger click handler
   hamburger.addEventListener('click', function(e) {
     e.stopPropagation();
     const isOpen = navLinks.classList.toggle('open');
@@ -281,25 +289,31 @@ function initHamburger() {
   });
 
   // Close menu when clicking backdrop
-  backdrop.addEventListener('click', function() {
-    navLinks.classList.remove('open');
-    backdrop.style.display = 'none';
+  backdrop.addEventListener('click', function(e) {
+    e.stopPropagation();
+    closeMenu();
   });
 
-  // Close menu when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
-      navLinks.classList.remove('open');
-      backdrop.style.display = 'none';
+  // Close menu when clicking on nav links
+  navLinks.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+      closeMenu();
     }
   });
 
-  // Close menu when a link is clicked
-  navLinks.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      navLinks.classList.remove('open');
-      backdrop.style.display = 'none';
-    });
+  // Close menu when clicking anywhere else on the page
+  document.addEventListener('click', function(e) {
+    const isMenuOpen = navLinks.classList.contains('open');
+    if (isMenuOpen && !hamburger.contains(e.target) && !navLinks.contains(e.target) && !backdrop.contains(e.target)) {
+      closeMenu();
+    }
+  }, { capture: false });
+
+  // Also close on escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+      closeMenu();
+    }
   });
 }
 

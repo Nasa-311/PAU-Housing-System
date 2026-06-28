@@ -1519,15 +1519,15 @@ body {
     flex-direction: column; 
     position: fixed; 
     top: 70px; 
-    left: 0; 
+    right: 0; 
     width: 280px;
     max-height: calc(100vh - 70px);
     background: var(--pau-blue-dark);
     padding: 16px;
     gap: 8px;
     z-index: 999;
-    border-radius: 0 0 12px 0;
-    box-shadow: 4px 8px 24px rgba(0,0,0,0.3);
+    border-radius: 0 0 0 12px;
+    box-shadow: -4px 8px 24px rgba(0,0,0,0.3);
     overflow-y: auto;
   }
   .nav-links a {
@@ -1551,7 +1551,7 @@ body {
   @keyframes slideDown {
     from {
       opacity: 0;
-      transform: translateX(-10px);
+      transform: translateX(10px);
     }
     to {
       opacity: 1;

@@ -73,6 +73,7 @@
   </footer>
 
   <script src="../js/accessibility.js"></script>
+  <script src="../js/config.js"></script>
   <script src="../js/main.js"></script>
   <script>
     const API = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://pau-housing-system.onrender.com'
@@ -208,9 +209,7 @@
       document.body.style.overflow = '';
     }
 
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.getElementById('navLinks').classList.toggle('open');
-    });
+    initHamburger();
 
     // Show sample data immediately, then try backend
     ALL_LANDLORDS = SAMPLE_LANDLORDS;

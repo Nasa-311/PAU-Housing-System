@@ -311,6 +311,7 @@
         <div class="chat-msg student-msg">
           <p>${msg}</p>
           <span class="chat-time">Just now</span>
+          <span class="chat-status" style="font-size:12px; color:#999; margin-top:4px;">✓ Delivered</span>
         </div>`;
       input.value = '';
       msgs.scrollTop = msgs.scrollHeight;
@@ -327,25 +328,9 @@
           })
         });
       } catch {}
-
-      setTimeout(() => {
-        const replies = [
-          'Thank you for your interest! The room is still available.',
-          'Yes, you can come for inspection anytime. Just call ahead.',
-          'The rent is payable annually. We can discuss payment plans.',
-          'Water and electricity are provided.',
-          'Please call me on my number to arrange a viewing.',
-        ];
-        const reply = replies[Math.floor(Math.random() * replies.length)];
-        msgs.innerHTML += `
-          <div class="chat-msg landlord-msg">
-            <p>${reply}</p>
-            <span class="chat-time">Just now</span>
-          </div>`;
-        msgs.scrollTop = msgs.scrollHeight;
-      }, 1500);
     }
 
+    initHamburger();
     loadProperty();
   </script>
 </body>

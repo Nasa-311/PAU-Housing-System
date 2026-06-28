@@ -91,6 +91,7 @@
   </div>
 
   <script src="../js/accessibility.js"></script>
+  <script src="../js/config.js"></script>
   <script src="../js/toast.js"></script>
   <script src="../js/main.js"></script>
   <script>
@@ -252,10 +253,7 @@
       applyFilters();
     }
 
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.getElementById('navLinks').classList.toggle('open');
-    });
-
+    initHamburger();
     applyFilters();
   </script>
 </body>
