@@ -50,7 +50,7 @@
         </div>
         <div class="chat-messages" id="chatMessages">
           <div class="chat-msg landlord-msg">
-            <p>Hello! I'm glad you're interested in this property. Feel free to ask me any questions.</p>
+            <p>Hello! I'm glad you're interested in this property. Feel free to ask me any questions regarding the facility.</p>
             <span class="chat-time">Now</span>
           </div>
         </div>
@@ -92,6 +92,13 @@
 
   <script src="../js/main.js"></script>
   <script>
+    // Environment selection base routing mirroring properties logic
+    const BASE_URL = typeof API_BASE_URL !== 'undefined' 
+      ? API_BASE_URL 
+      : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:3000' 
+          : window.location.origin.replace('//pau-', '//api-pau-'));
+
     const IMAGES = {
       'self-contain': [
         'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=900&q=80',
@@ -125,18 +132,18 @@
     }
 
     const SAMPLE_PROPERTIES = [
-      { id:1,  name:'Sunrise Lodge',      address:'Beside PAU Gate, Ibeju-Lekki',  rent:350000, room_type:'self-contain', distance_from_school:0.3, description:'Clean self-contain with kitchen and bathroom. 24/7 security, water supply. 5 mins from PAU gate.', landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true },
-      { id:2,  name:'Grace Apartment',    address:'Abraham Adesanya Estate, Ajah',  rent:280000, room_type:'shared',       distance_from_school:0.8, description:'Affordable shared room in a clean compound. Good road network to PAU.', landlord_name:'Mrs. Chioma Okafor', phone:'08098765432', landlord_email:'chioma@example.com', available:true },
-      { id:3,  name:'Royal Chambers',     address:'Bogije, Ibeju-Lekki',            rent:480000, room_type:'flat',         distance_from_school:1.2, description:'Spacious 2-bedroom flat for 2 students. Fully tiled, borehole water.', landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true },
-      { id:4,  name:'Palm View Hostel',   address:'Lakowe Estate',                   rent:220000, room_type:'single',       distance_from_school:2.0, description:'Budget single room with good ventilation. Okada available to PAU daily.', landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com', available:true },
-      { id:5,  name:'Lekki Gardens',      address:'Ibeju-Lekki Town',               rent:400000, room_type:'self-contain', distance_from_school:0.6, description:'Modern self-contain with fitted kitchen. Close to PAU. CCTV on site.', landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com', available:true },
-      { id:6,  name:'Blue Crest Rooms',   address:'Ajah, Lagos',                    rent:310000, room_type:'shared',       distance_from_school:1.5, description:'Clean shared rooms. Easy bus access to PAU campus daily.', landlord_name:'Mrs. Ngozi Eze', phone:'08145678901', landlord_email:'ngozi@example.com', available:false },
-      { id:7,  name:'Harmony Court',      address:'Elerangbe, Ibeju-Lekki',         rent:450000, room_type:'flat',         distance_from_school:0.9, description:'1-bedroom flat in quiet estate. Prepaid meter, borehole and generator.', landlord_name:'Mr. Tunde Balogun', phone:'08023456789', landlord_email:'tunde@example.com', available:true },
-      { id:8,  name:'Sunrise Court',      address:'Akodo, Ibeju-Lekki',             rent:260000, room_type:'single',       distance_from_school:1.8, description:'Single room with fan, reading table and wardrobe. Secure compound.', landlord_name:'Mrs. Ngozi Eze', phone:'08145678901', landlord_email:'ngozi@example.com', available:true },
-      { id:9,  name:'Victoria Suites',    address:'Ibeju-Lekki',                    rent:520000, room_type:'flat',         distance_from_school:0.5, description:'Executive 2-bedroom. 24-hour power. Ideal for 2 students.', landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com', available:true },
-      { id:10, name:'Peace Haven',        address:'Bogije Road, Ibeju-Lekki',       rent:290000, room_type:'self-contain', distance_from_school:1.0, description:'Neat self-contain in peaceful compound. Tiled floors, ceiling fan.', landlord_name:'Mrs. Chioma Okafor', phone:'08098765432', landlord_email:'chioma@example.com', available:true },
-      { id:11, name:'Green Valley Rooms', address:'Lakowe-Akodo Road',              rent:200000, room_type:'single',       distance_from_school:2.5, description:'Very affordable single room. Shared toilet and bathroom kept clean.', landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com', available:true },
-      { id:12, name:'Ambassador Lodge',   address:'Beside PAU Road, Ibeju-Lekki',  rent:380000, room_type:'self-contain', distance_from_school:0.4, description:'Well-finished self-contain very close to PAU. Running water, prepaid electricity.', landlord_name:'Mr. Tunde Balogun', phone:'08023456789', landlord_email:'tunde@example.com', available:true },
+      { id:1,  name:'Sunrise Lodge',      address:'Beside PAU Gate, Ibeju-Lekki',  rent:350000, room_type:'self-contain', distance_from_school:0.3, description:'Clean self-contain with kitchen and bathroom. 24/7 security, water supply. 5 mins from PAU gate.', landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true, electricity: 'Prepaid Meter', water: 'Borehole Running Water', road_status: 'Tarred' },
+      { id:2,  name:'Grace Apartment',    address:'Abraham Adesanya Estate, Ajah',  rent:280000, room_type:'shared',       distance_from_school:0.8, description:'Affordable shared room in a clean compound. Good road network to PAU.', landlord_name:'Mrs. Chioma Okafor', phone:'08098765432', landlord_email:'chioma@example.com', available:true, electricity: 'Constant Grid', water: 'Borehole Running Water', road_status: 'Tarred' },
+      { id:3,  name:'Royal Chambers',     address:'Bogije, Ibeju-Lekki',            rent:480000, room_type:'flat',         distance_from_school:1.2, description:'Spacious 2-bedroom flat for 2 students. Fully tiled, borehole water.', landlord_name:'Mr. Adebayo Johnson', phone:'08012345678', landlord_email:'adebayo@example.com', available:true, electricity: 'Prepaid Meter', water: 'Borehole Running Water', road_status: 'Uncompacted Earth' },
+      { id:4,  name:'Palm View Hostel',   address:'Lakowe Estate',                   rent:220000, room_type:'single',       distance_from_school:2.0, description:'Budget single room with good ventilation. Okada available to PAU daily.', landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com', available:true, electricity: 'Prepaid Meter', water: 'Well Water', road_status: 'Graded' },
+      { id:5,  name:'Lekki Gardens',      address:'Ibeju-Lekki Town',               rent:400000, room_type:'self-contain', distance_from_school:0.6, description:'Modern self-contain with fitted kitchen. Close to PAU. CCTV on site.', landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com', available:true, electricity: 'Prepaid Meter', water: 'Borehole Running Water', road_status: 'Tarred' },
+      { id:6,  name:'Blue Crest Rooms',   address:'Ajah, Lagos',                    rent:310000, room_type:'shared',       distance_from_school:1.5, description:'Clean shared rooms. Easy bus access to PAU campus daily.', landlord_name:'Mrs. Ngozi Eze', phone:'08145678901', landlord_email:'ngozi@example.com', available:false, electricity: 'Constant Grid', water: 'Borehole Running Water', road_status: 'Tarred' },
+      { id:7,  name:'Harmony Court',      address:'Elerangbe, Ibeju-Lekki',         rent:450000, room_type:'flat',         distance_from_school:0.9, description:'1-bedroom flat in quiet estate. Prepaid meter, borehole and generator.', landlord_name:'Mr. Tunde Balogun', phone:'08023456789', landlord_email:'tunde@example.com', available:true, electricity: 'Prepaid Meter', water: 'Borehole Running Water', road_status: 'Graded' },
+      { id:8,  name:'Sunrise Court',      address:'Akodo, Ibeju-Lekki',             rent:260000, room_type:'single',       distance_from_school:1.8, description:'Single room with fan, reading table and wardrobe. Secure compound.', landlord_name:'Mrs. Ngozi Eze', phone:'08145678901', landlord_email:'ngozi@example.com', available:true, electricity: 'Constant Grid', water: 'Well Water', road_status: 'Uncompacted Earth' },
+      { id:9,  name:'Victoria Suites',    address:'Ibeju-Lekki',                    rent:520000, room_type:'flat',         distance_from_school:0.5, available:true, landlord_name:'Mr. Emeka Nwachukwu', phone:'08056781234', landlord_email:'emeka@example.com', available:true, electricity: 'Prepaid Meter', water: 'Borehole Running Water', road_status: 'Tarred' },
+      { id:10, name:'Peace Haven',        address:'Bogije Road, Ibeju-Lekki',       rent:290000, room_type:'self-contain', distance_from_school:1.0, description:'Neat self-contain in peaceful compound. Tiled floors, ceiling fan.', landlord_name:'Mrs. Chioma Okafor', phone:'08098765432', landlord_email:'chioma@example.com', available:true, electricity: 'Prepaid Meter', water: 'Borehole Running Water', road_status: 'Graded' },
+      { id:11, name:'Green Valley Rooms', address:'Lakowe-Akodo Road',              rent:200000, room_type:'single',       distance_from_school:2.5, description:'Very affordable single room. Shared toilet and bathroom kept clean.', landlord_name:'Mrs. Folake Adeleke', phone:'08134567890', landlord_email:'folake@example.com', available:true, electricity: 'Constant Grid', water: 'Well Water', road_status: 'Uncompacted Earth' },
+      { id:12, name:'Ambassador Lodge',   address:'Beside PAU Road, Ibeju-Lekki',  rent:380000, room_type:'self-contain', distance_from_school:0.4, description:'Well-finished self-contain very close to PAU. Running water, prepaid electricity.', landlord_name:'Mr. Tunde Balogun', phone:'08023456789', landlord_email:'tunde@example.com', available:true, electricity: 'Prepaid Meter', water: 'Borehole Running Water', road_status: 'Tarred' },
     ];
 
     const params = new URLSearchParams(window.location.search);
@@ -145,10 +152,11 @@
     async function loadProperty() {
       let property;
       try {
-        const res = await fetch(`${API_BASE}/properties/${propId}`);
+        const res = await fetch(`${BASE_URL}/api/properties/${propId}`);
         if (res.ok) property = await res.json();
         else throw new Error('not found');
-      } catch {
+      } catch (err) {
+        console.warn("Backend dynamic route dropped, utilizing matched schema samples:", err);
         property = SAMPLE_PROPERTIES.find(p => p.id === propId) || SAMPLE_PROPERTIES[0];
       }
       renderProperty(property);
@@ -157,9 +165,14 @@
     function renderProperty(p) {
       const imgs    = getImagesForType(p.room_type);
       const mainImg = p.image_url
-        ? `${API_BASE.replace('/api', '')}${p.image_url}`
+        ? `${BASE_URL}${p.image_url}`
         : imgs[0];
       const thumbImgs = imgs;
+
+      // Handle sensitive view properties conditionally based on user session token state
+      const token = localStorage.getItem('pau_token');
+      const contactPhone = token ? (p.phone || 'Not Provided') : 'Sign in to view';
+      const contactEmail = token ? (p.landlord_email || 'Not Provided') : 'Sign in to view';
 
       document.getElementById('detailLayout').innerHTML = `
         <div style="max-width:1100px;margin:0 auto;padding:32px 5% 20px;">
@@ -201,15 +214,34 @@
                   <h3>About This Property</h3>
                   <p>${p.description || 'A comfortable accommodation option near Pan-Atlantic University campus.'}</p>
                 </div>
-                <div class="detail-amenities">
-                  <h3>Amenities</h3>
+                
+                <!-- NEW DETAILED STRUCTURAL OVERVIEW -->
+                <div class="detail-infrastructure" style="margin-top:24px; padding-top:20px; border-top:1px solid #e5e7eb;">
+                  <h3>Facility Logistics</h3>
+                  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:12px;">
+                    <div style="background:#f9fafb; padding:12px; border-radius:8px; border-left:4px solid #3b82f6;">
+                      <span style="font-size:12px; color:#6b7280; display:block; text-transform:uppercase; font-weight:600;">Electricity Setup</span>
+                      <strong style="color:#1f2937; font-size:14px;">⚡ ${p.electricity || 'Prepaid Meter'}</strong>
+                    </div>
+                    <div style="background:#f9fafb; padding:12px; border-radius:8px; border-left:4px solid #10b981;">
+                      <span style="font-size:12px; color:#6b7280; display:block; text-transform:uppercase; font-weight:600;">Water Infrastructure</span>
+                      <strong style="color:#1f2937; font-size:14px;">💧 ${p.water || 'Borehole Running Water'}</strong>
+                    </div>
+                    <div style="background:#f9fafb; padding:12px; border-radius:8px; border-left:4px solid #f59e0b;">
+                      <span style="font-size:12px; color:#6b7280; display:block; text-transform:uppercase; font-weight:600;">Road Network Quality</span>
+                      <strong style="color:#1f2937; font-size:14px;">🛣️ ${p.road_status || 'Tarred Road'}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-amenities" style="margin-top:24px;">
+                  <h3>Core Amenities Included</h3>
                   <div class="amenities-grid">
-                    <span class="amenity">💧 Borehole Water</span>
-                    <span class="amenity">⚡ Generator Backup</span>
-                    <span class="amenity">🔒 24/7 Security</span>
+                    <span class="amenity">💧 Borehole Supply</span>
+                    <span class="amenity">⚡ Generator Space</span>
+                    <span class="amenity">🔒 Gated Security</span>
                     <span class="amenity">🚪 Private Entrance</span>
-                    <span class="amenity">📶 Good Network</span>
-                    <span class="amenity">🛣️ Tarred Road</span>
+                    <span class="amenity">📶 High Connectivity Area</span>
                   </div>
                 </div>
               </div>
@@ -243,8 +275,8 @@
                     <p style="font-size:12px;color:#059669;font-weight:600;">✅ Verified Landlord</p>
                   </div>
                 </div>
-                <div class="detail-contact-item">📞 <span>${p.phone || 'Login to view'}</span></div>
-                <div class="detail-contact-item">✉️ <span>${p.landlord_email || 'Login to view'}</span></div>
+                <div class="detail-contact-item" id="phoneContainer">📞 <span>${contactPhone}</span></div>
+                <div class="detail-contact-item" id="emailContainer">✉️ <span>${contactEmail}</span></div>
                 <a href="landlords.html" class="btn-outline"
                   style="width:100%;text-align:center;margin-top:14px;display:block;">
                   View All Landlords
@@ -317,9 +349,12 @@
       msgs.scrollTop = msgs.scrollHeight;
 
       try {
-        await fetch(`${API_BASE}/messages`, {
+        await fetch(`${BASE_URL}/api/messages`, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
             sender_id:   user.id,
             landlord_id: p.landlord_id || null,
@@ -327,7 +362,9 @@
             message:     msg
           })
         });
-      } catch {}
+      } catch (err) {
+        console.error("Message transmission error:", err);
+      }
     }
 
     initHamburger();
