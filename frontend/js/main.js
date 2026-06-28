@@ -49,12 +49,17 @@ function getImg(roomType) {
 // NAVBAR
 // ==========================================
 function updateNavbar() {
+  // Prevent running more than once per page load
+  if (window._navUpdated) return;
+  window._navUpdated = true;
+
   const user  = JSON.parse(localStorage.getItem('pau_user') || 'null');
   const token = localStorage.getItem('pau_token');
   const nav   = document.getElementById('navLinks');
   if (!nav) return;
 
   if (token && user) {
+    // Remove landlord-irrelevant links
     if (user.role === 'landlord') {
       nav.querySelectorAll('li').forEach(li => {
         const a = li.querySelector('a');
@@ -64,6 +69,7 @@ function updateNavbar() {
       });
     }
 
+    // Remove login and signup links
     nav.querySelectorAll('li').forEach(li => {
       const a = li.querySelector('a');
       if (a && (a.href.includes('login.html') || a.href.includes('register.html'))) {
@@ -71,12 +77,19 @@ function updateNavbar() {
       }
     });
 
+    // Remove any previously added dashboard/logout links to prevent duplicates
+    nav.querySelectorAll('li.nav-user-item').forEach(li => li.remove());
+
+    // Add dashboard link
     const dashUrl = user.role === 'landlord' ? 'owner-dashboard.html' : 'student-dashboard.html';
     const dashLi  = document.createElement('li');
+    dashLi.className = 'nav-user-item';
     dashLi.innerHTML = `<a href="${dashUrl}" class="btn-nav">👤 ${user.name.split(' ')[0]}</a>`;
     nav.appendChild(dashLi);
 
+    // Add logout link
     const logoutLi = document.createElement('li');
+    logoutLi.className = 'nav-user-item';
     logoutLi.innerHTML = `<a href="#" class="btn-nav-outline" onclick="logoutUser(event)">Logout</a>`;
     nav.appendChild(logoutLi);
   }
