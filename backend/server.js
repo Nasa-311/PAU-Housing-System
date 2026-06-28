@@ -109,7 +109,7 @@ async function sendSignupEmail(name, email, role) {
 }
 
 // ==========================================
-// TEST
+// TEST ROUTE
 // ==========================================
 app.get('/', (req, res) => res.json({ message: '✅ PAU Housing API is running!' }));
 
@@ -220,23 +220,7 @@ app.get('/api/properties/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/properties', upload.array('images', 5), async (req, res) => {
-  const { name, address, room_type, rent, distance_from_school, available, description, landlord_id } = req.body;
-  const imageUrl = req.files && req.files.length > 0 ? `/uploads/${req.files[0].filename}` : null;
-  try {
-    const r = await pool.query(
-      `INSERT INTO properties (name,address,room_type,rent,distance_from_school,available,description,landlord_id,image_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-      [name, address, room_type, Number(rent), Number(distance_from_school || 0),
-       available !== 'false', description || '', landlord_id || null, imageUrl]
-    );
-    res.status(201).json(r.rows[0]);
-  } catch (err) {
-    console.error('Add property error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
+// CLEAN REFACTOR: Eliminated duplicate declaration completely 
 app.post('/api/properties', upload.array('images', 5), async (req, res) => {
   const { name, address, room_type, rent, distance_from_school, available, description, landlord_id } = req.body;
   const imageUrl = req.files && req.files.length > 0 ? `/uploads/${req.files[0].filename}` : null;
@@ -261,10 +245,10 @@ app.delete('/api/properties/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Get properties for logged-in landlord — using landlord_id from token
 app.get('/api/my-properties', async (req, res) => {
   const auth = (req.headers['authorization'] || '').replace('Bearer pau-', '');
   const uid  = auth.split('-')[0];
+  if(!uid) return res.status(401).json({ error: 'Unauthorized credentials token setup' });
   try {
     const u = await pool.query('SELECT * FROM users WHERE id=$1', [uid]);
     if (!u.rows.length) return res.status(404).json({ error: 'User not found' });
