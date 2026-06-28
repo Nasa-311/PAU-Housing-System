@@ -129,13 +129,13 @@
     <div class="sidebar-brand"><span>🏛</span><p>PAU Housing</p></div>
     <nav class="sidebar-nav">
       <a href="#" class="sidebar-link active" onclick="showTab('listings',this)"><span class="sidebar-icon">🏠</span> My Listings</a>
-      <a href="#" class="sidebar-link owner-only" onclick="showTab('add',this)"><span class="sidebar-icon">➕</span> Add Property</a>
-      <a href="#" class="sidebar-link owner-only" onclick="showTab('messages',this)"><span class="sidebar-icon">💬</span> Messages <span class="msg-badge" id="msgBadge" style="display:none">0</span></a>
-      <a href="#" class="sidebar-link owner-only" onclick="showTab('profile',this)"><span class="sidebar-icon">👤</span> My Profile</a>
-      <a href="settings.html" class="sidebar-link owner-only"><span class="sidebar-icon">⚙️</span> Settings</a>
-      <a href="landlords.html" class="sidebar-link viewer-only" style="display:none;"><span class="sidebar-icon">⬅️</span> Back to Landlords</a>
+      <a href="#" class="sidebar-link" onclick="showTab('add',this)"><span class="sidebar-icon">➕</span> Add Property</a>
+      <a href="#" class="sidebar-link" onclick="showTab('messages',this)"><span class="sidebar-icon">💬</span> Messages <span class="msg-badge" id="msgBadge" style="display:none">0</span></a>
+      <a href="#" class="sidebar-link" onclick="showTab('profile',this)"><span class="sidebar-icon">👤</span> My Profile</a>
+      <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+      <a href="../../index.html" class="sidebar-link"><span class="sidebar-icon">🌐</span> Back to Site</a>
     </nav>
-    <button class="sidebar-logout" id="logoutBtn" onclick="logout()">🚪 Logout</button>
+    <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
   </aside>
 
   <main class="dashboard-main">
@@ -145,41 +145,41 @@
         <div class="dash-avatar owner-avatar" id="userAvatar">OW</div>
         <div>
           <div style="font-size:14px;font-weight:600;color:var(--pau-text)" id="userName">Owner</div>
-          <div style="font-size:11px;color:var(--pau-accent);font-weight:700" id="userRoleBadge">🏠 Property Owner</div>
+          <div style="font-size:11px;color:var(--pau-accent);font-weight:700">🏠 Property Owner</div>
         </div>
       </div>
     </div>
 
     <!-- HERO BANNER -->
     <div class="owner-hero-banner">
-      <div class="owner-badge" id="bannerBadge">🏠 Property Owner Portal</div>
+      <div class="owner-badge">🏠 Property Owner Portal</div>
       <p class="owner-welcome" id="welcomeName">Welcome back</p>
-      <p class="owner-sub" id="bannerSub">Manage your listings, view student enquiries and track your properties.</p>
-      <div class="owner-hero-tabs" id="bannerTabs">
+      <p class="owner-sub">Manage your listings, view student enquiries and track your properties.</p>
+      <div class="owner-hero-tabs">
         <button class="owner-tab active" onclick="showTab('listings',null)">My Listings</button>
-        <button class="owner-tab owner-only" onclick="showTab('add',null)">Add Property</button>
-        <button class="owner-tab owner-only" onclick="showTab('messages',null)">Messages</button>
-        <button class="owner-tab owner-only" onclick="showTab('profile',null)">Profile</button>
+        <button class="owner-tab" onclick="showTab('add',null)">Add Property</button>
+        <button class="owner-tab" onclick="showTab('messages',null)">Messages</button>
+        <button class="owner-tab" onclick="showTab('profile',null)">Profile</button>
       </div>
     </div>
 
     <!-- LISTINGS -->
     <section class="dash-section" id="tab-listings">
       <div class="dash-section-header">
-        <h1 id="listingsHeading">My Property Listings</h1>
-        <p id="listingsSub">All properties listed on PAU Housing.</p>
+        <h1>My Property Listings</h1>
+        <p>All properties you have listed on PAU Housing.</p>
       </div>
       <div class="dash-stats-row">
         <div class="dash-stat-card"><span class="ds-num" id="totalCount">0</span><span class="ds-label">Total Listings</span></div>
         <div class="dash-stat-card gold-top"><span class="ds-num" id="availCount">0</span><span class="ds-label">Available Now</span></div>
         <div class="dash-stat-card"><span class="ds-num" id="avgRent">₦0</span><span class="ds-label">Avg. Annual Rent</span></div>
-        <div class="dash-stat-card gold-top owner-only"><span class="ds-num" id="msgCount">0</span><span class="ds-label">Messages</span></div>
+        <div class="dash-stat-card gold-top"><span class="ds-num" id="msgCount">0</span><span class="ds-label">Messages</span></div>
       </div>
-      <div style="margin-bottom:20px" class="owner-only">
+      <div style="margin-bottom:20px">
         <button class="btn-primary" onclick="showTab('add',null)">+ Add New Property</button>
       </div>
       <div id="listingsContainer">
-        <div class="empty-state"><p>📋 No listings yet.</p></div>
+        <div class="empty-state"><p>📋 No listings yet. Add your first property!</p></div>
       </div>
     </section>
 
@@ -263,79 +263,20 @@
     const API   = window.location.hostname === 'localhost'
       ? 'http://localhost:3000/api'
       : 'https://pau-housing-system.onrender.com/api';
-    
-    // Check URL parameters first for context switching
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetLandlordId = urlParams.get('landlord_id');
-    const isPublicViewer = targetLandlordId !== null;
+    const user  = JSON.parse(localStorage.getItem('pau_user') || '{}');
+    const token = localStorage.getItem('pau_token');
 
-    let user  = JSON.parse(localStorage.getItem('pau_user') || '{}');
-    let token = localStorage.getItem('pau_token');
+    if (!token) window.location.href = 'login.html';
 
-    // If it's not a public request, check authentication guardrails
-    if (!isPublicViewer && !token) {
-      window.location.href = 'login.html';
-    }
-
-    // Process UI modifications depending on viewing mode context
-    if (isPublicViewer) {
-      setupPublicViewerMode();
-    } else {
-      setupActiveOwnerMode();
-    }
-
-    function setupPublicViewerMode() {
-      // Hide administrative links and actions
-      document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.viewer-only').forEach(el => el.style.display = 'inline-block');
-      
-      // Morph logout into standard context safe escape
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.innerHTML = '⬅️ Back to Portal';
-        logoutBtn.onclick = () => { window.location.href = 'landlords.html'; };
-      }
-
-      // Update structural typography context elements
-      document.getElementById('userRoleBadge').textContent = '📋 Verified Landlord Catalog';
-      document.getElementById('bannerBadge').textContent = '🔍 Public Landlord Showroom';
-      document.getElementById('listingsHeading').textContent = 'Listed Accommodations';
-      document.getElementById('listingsSub').textContent = 'Explore properties managed by this landlord.';
-
-      // Fetch landlord profiles directly to extract dynamic info text mappings 
-      fetchLandlordContextDetails(targetLandlordId);
-    }
-
-    function setupActiveOwnerMode() {
-      if (user.name) {
-        const init = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-        document.getElementById('userAvatar').textContent    = init;
-        document.getElementById('userName').textContent      = user.name;
-        document.getElementById('welcomeName').textContent   = 'Welcome back, ' + user.name.split(' ')[0];
-        document.getElementById('profileAvatar').textContent = init;
-        document.getElementById('profileName').value         = user.name;
-        document.getElementById('profileEmail').value        = user.email;
-        document.getElementById('profilePhone').value        = user.phone || '';
-      }
-    }
-
-    async function fetchLandlordContextDetails(landlordId) {
-      try {
-        const res = await fetch(`${API}/landlords`);
-        const landlords = await res.json();
-        const current = landlords.find(l => String(l.id) === String(landlordId));
-        
-        if (current) {
-          const init = current.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-          document.getElementById('userAvatar').textContent = init;
-          document.getElementById('userName').textContent = current.name;
-          document.getElementById('welcomeName').textContent = current.name;
-          document.getElementById('bannerSub').textContent = current.bio || 'Verified property owner near PAU campus.';
-        }
-      } catch (err) {
-        console.warn('Could not parse explicit landlord name descriptors.', err);
-        document.getElementById('welcomeName').textContent = 'Landlord Profile';
-      }
+    if (user.name) {
+      const init = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('userAvatar').textContent    = init;
+      document.getElementById('userName').textContent      = user.name;
+      document.getElementById('welcomeName').textContent   = 'Welcome back, ' + user.name.split(' ')[0];
+      document.getElementById('profileAvatar').textContent = init;
+      document.getElementById('profileName').value         = user.name;
+      document.getElementById('profileEmail').value        = user.email;
+      document.getElementById('profilePhone').value        = user.phone || '';
     }
 
     // --- Section switching ---
@@ -349,17 +290,18 @@
     }
 
     // --- Load listings ---
+    // Tries backend first using landlord_id filter
     async function loadListings() {
-      const activeId = isPublicViewer ? targetLandlordId : user.landlord_id;
       try {
         let data = [];
-        if (activeId) {
-          const res = await fetch(`${API}/properties?landlord_id=${activeId}`, {
-            headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        if (user.landlord_id) {
+          const res = await fetch(`${API}/properties?landlord_id=${user.landlord_id}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
           });
           data = await res.json();
         }
-        if (!data.length && !isPublicViewer) {
+        // Also try my-properties endpoint
+        if (!data.length) {
           const res2 = await fetch(`${API}/my-properties`, {
             headers: { 'Authorization': 'Bearer ' + token }
           });
@@ -383,9 +325,7 @@
 
       const c = document.getElementById('listingsContainer');
       if (!list.length) {
-        c.innerHTML = isPublicViewer 
-          ? `<div class="empty-state"><p>📋 No active public listings linked to this landlord at the moment.</p></div>`
-          : `<div class="empty-state"><p>📋 No listings yet. Add your first property!</p><button class="btn-primary owner-only" onclick="showTab('add',null)" style="margin-top:16px">+ Add Property</button></div>`;
+        c.innerHTML = `<div class="empty-state"><p>📋 No listings yet. Add your first property!</p><button class="btn-primary" onclick="showTab('add',null)" style="margin-top:16px">+ Add Property</button></div>`;
         return;
       }
 
@@ -412,15 +352,14 @@
               ${p.available ? '✅ Available' : '❌ Unavailable'}
             </div>
             <div class="listing-actions">
-               ${isPublicViewer ? `<a href="properties.html" class="btn-sm-edit" style="text-decoration:none; text-align:center;">Inspect</a>` : `<button class="btn-sm-delete" onclick="deleteProp(${p.id},'${p.name}')">Delete</button>`}
+              <button class="btn-sm-delete" onclick="deleteProp(${p.id},'${p.name}')">Delete</button>
             </div>
           </div>`;
       }).join('');
     }
 
-    // --- Delete property ---
+    // --- Delete property with nice confirm popup ---
     function deleteProp(id, name) {
-      if(isPublicViewer) return;
       showConfirm(
         `Delete "${name}"?`,
         'This will permanently remove this listing. Students will no longer be able to see it.',
@@ -460,7 +399,6 @@
 
     // --- Submit property ---
     async function submitProperty() {
-      if(isPublicViewer) return;
       const name    = document.getElementById('propName').value.trim();
       const address = document.getElementById('propAddress').value.trim();
       const type    = document.getElementById('propType').value;
@@ -526,7 +464,6 @@
 
     // --- Load messages ---
     async function loadMessages() {
-      if(isPublicViewer) return;
       const c = document.getElementById('messagesContainer');
       if (!user.landlord_id) {
         c.innerHTML = `<div class="empty-state"><p>Landlord profile not linked. Re-register as a landlord.</p></div>`;
