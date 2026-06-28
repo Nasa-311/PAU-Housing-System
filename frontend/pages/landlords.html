@@ -94,7 +94,12 @@
     // ---- Load from backend first, fallback to sample ----
     async function loadLandlords() {
       try {
-        const res  = await fetch(`${API}/landlords`);
+        // Add 3 second timeout to fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        
+        const res  = await fetch(`${API}/landlords`, { signal: controller.signal });
+        clearTimeout(timeout);
         const data = await res.json();
         // Merge with icons
         ALL_LANDLORDS = data.map((l, i) => ({
@@ -103,7 +108,7 @@
           properties_count: Number(l.properties_count) || 0
         }));
         if (ALL_LANDLORDS.length === 0) ALL_LANDLORDS = SAMPLE_LANDLORDS;
-      } catch {
+      } catch (err) {
         ALL_LANDLORDS = SAMPLE_LANDLORDS;
       }
       renderLandlords(ALL_LANDLORDS);

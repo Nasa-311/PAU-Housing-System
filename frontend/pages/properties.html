@@ -171,9 +171,15 @@
         if (name)    qp.append('name', name);
         if (type)    qp.append('room_type', type);
         if (maxRent) qp.append('max_rent', maxRent);
-        const res = await fetch(`http://localhost:3000/api/properties?${qp}`);
+        
+        // Add 3 second timeout to fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        
+        const res = await fetch(`http://localhost:3000/api/properties?${qp}`, { signal: controller.signal });
+        clearTimeout(timeout);
         data = await res.json();
-      } catch {
+      } catch (err) {
         data = [...SAMPLE_DATA];
       }
 
@@ -248,6 +254,9 @@
       document.getElementById('filterName').value = '';
       document.getElementById('filterType').value = '';
       document.getElementById('filterRent').value = 1000000;
+    // Show sample data immediately
+    renderProperties(SAMPLE_DATA);
+    // Then try to fetch backend data with timeout
       document.getElementById('filterRentDisplay').textContent = '₦1,000,000';
       document.getElementById('filterDist').value = '';
       applyFilters();
