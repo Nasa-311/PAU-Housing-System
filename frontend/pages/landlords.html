@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Landlords — PAU Housing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css"/>
 </head>
 <body>
@@ -74,10 +74,8 @@
   <script src="../js/config.js"></script>
   <script src="../js/main.js"></script>
   <script>
-    // Prioritize fallback to global API configurations defined in main.js/config.js
     const API = window.API_BASE || 'http://localhost:3000/api';
 
-    // Sample data shown when backend is offline
     const SAMPLE_LANDLORDS = [
       { id:1, name:'Mr. Adebayo Johnson',  phone:'08012345678', email:'adebayo@example.com',  address:'Bogije, Ibeju-Lekki',           bio:'Experienced landlord with multiple properties near PAU. 24/7 security and constant water supply.',              properties_count:3, icon:'👨‍💼' },
       { id:2, name:'Mrs. Chioma Okafor',   phone:'08098765432', email:'chioma@example.com',   address:'Abraham Adesanya Estate, Ajah', bio:'Friendly landlord providing affordable accommodation for PAU students. Kitchen and bathroom in every unit.',        properties_count:2, icon:'👩‍💼' },
@@ -90,13 +88,11 @@
     const ICONS = ['👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼'];
     let ALL_LANDLORDS = [];
 
-    // ---- Load from backend first, fallback to sample ----
     async function loadLandlords() {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 4000);
         
-        // Trim standard route tags cleanly if your configuration files vary
         const fetchUrl = API.endsWith('/api') ? `${API}/landlords` : `${API.replace(/\/$/, '')}/landlords`;
         const res = await fetch(fetchUrl, { signal: controller.signal });
         clearTimeout(timeout);
@@ -158,7 +154,6 @@
     }
 
     function openLandlord(id) {
-      // Use standard non-strict loose matching string comparison to ensure database generated UUIDs/integers pair correctly
       const l = ALL_LANDLORDS.find(x => String(x.id) === String(id));
       if (!l) return;
 
@@ -174,10 +169,9 @@
               <a href="register.html" style="color:var(--pau-blue);font-weight:600;">create a free account</a>.
            </div>`;
 
-      const propsUrl  = `properties.html?landlord_id=${l.id}&landlord_name=${encodeURIComponent(l.name)}`;
-      const propsText = l.properties_count > 0
-        ? `View ${l.properties_count} Propert${Number(l.properties_count) === 1 ? 'y' : 'ies'}`
-        : 'View Properties';
+      // CHANGED: Redirects cleanly to the dashboard instead of public property index listings
+      const propsUrl  = `owner-dashboard.html?landlord_id=${l.id}`;
+      const propsText = `View Dashboard Listings`;
 
       document.getElementById('modalContent').innerHTML = `
         <div style="text-align:center;margin-bottom:24px;">
@@ -221,19 +215,12 @@
       document.body.style.overflow = '';
     }
 
-    // Initialize scripts on DOM load
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Setup responsive hamburger action listener
       if (typeof initHamburger === 'function') initHamburger();
-      
-      // 2. Synchronize navigation buttons with local state context
       if (typeof updateNavbar === 'function') updateNavbar();
 
-      // 3. Mount instant render fallback before background execution completes
       ALL_LANDLORDS = SAMPLE_LANDLORDS;
       renderLandlords(ALL_LANDLORDS);
-      
-      // 4. Fetch the real accounts from backend
       loadLandlords();
     });
   </script>
