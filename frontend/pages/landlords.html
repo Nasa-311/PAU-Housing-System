@@ -261,7 +261,7 @@
            </div>`
         : '';
 
-      const propsUrl  = `owner-dashboard.html?landlord_id=${l.id}`;
+      const propsUrl  = `properties.html?landlord_id=${l.id}&landlord_name=${encodeURIComponent(l.name)}`;
 
       document.getElementById('modalContent').innerHTML = `
         <div style="text-align:center;margin-bottom:24px;">
@@ -291,7 +291,7 @@
           ${contactInfo}
           <a href="${propsUrl}" class="btn-primary"
             style="width:100%;text-align:center;display:block;margin-top:16px;text-decoration:none;">
-            🏠 View Dashboard Listings
+            🏠 View Properties
           </a>
         </div>
         ${chatSectionHtml}
