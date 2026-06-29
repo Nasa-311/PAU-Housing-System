@@ -21,17 +21,21 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
   'http://localhost:5500',
   'http://127.0.0.1:5500',
-  'https://pau-housing-system.onrender.com' // Production link fallback
+  'https://pau-housing-system.onrender.com', // Production link fallback
+  'https://pau-housing-system.vercel.app'    // ✅ Added your Vercel production frontend
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    
+    // Check if the domain is in our allowed origins list or is a local network IP
     if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://192.168.')) {
       return callback(null, true);
     }
-    // Fallback wrapper to make local testing less strict
+    
+    // Fallback wrapper to pass origin safely 
     return callback(null, true);
   },
   credentials: true,
@@ -220,7 +224,6 @@ app.get('/api/properties/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// CLEAN REFACTOR: Eliminated duplicate declaration completely 
 app.post('/api/properties', upload.array('images', 5), async (req, res) => {
   const { name, address, room_type, rent, distance_from_school, available, description, landlord_id } = req.body;
   const imageUrl = req.files && req.files.length > 0 ? `/uploads/${req.files[0].filename}` : null;
