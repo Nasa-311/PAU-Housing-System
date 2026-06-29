@@ -31,7 +31,6 @@
   </div>
 
   <div class="properties-page-layout">
-    <!-- FILTERS -->
     <aside class="filter-sidebar">
       <h3>Filter Listings</h3>
       <div class="filter-group">
@@ -66,14 +65,12 @@
       <button class="btn-primary filter-btn" onclick="applyFilters()">Apply Filters</button>
       <button class="btn-outline  filter-btn" onclick="clearFilters()">Clear Filters</button>
 
-      <!-- Back to landlord if coming from landlord profile -->
       <div id="backToLandlord" style="display:none; margin-top:16px;">
         <a href="landlords.html" class="btn-outline"
           style="width:100%;text-align:center;display:block;">&#8592; All Landlords</a>
       </div>
     </aside>
 
-    <!-- RESULTS -->
     <div class="properties-results">
       <div class="results-header">
         <span id="resultsCount">Loading...</span>
@@ -96,12 +93,12 @@
   <script src="../js/main.js"></script>
   <script>
     // --- Environment Config Selection ---
-    // Detects if running locally or deployed, and safely sets your backend URL
+    // Safely routes to localhost when testing locally, or your live production Render app
     const BASE_URL = typeof API_BASE_URL !== 'undefined' 
       ? API_BASE_URL 
       : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
           ? 'http://localhost:3000' 
-          : window.location.origin.replace('//pau-', '//api-pau-')); // Fallback pattern matching your deployment url
+          : 'https://pau-housing-system.onrender.com'); // ✅ Points directly to your verified Render instance
 
     const TYPE_IMAGES = {
       'self-contain': ['../images/self-contained1.jpg','../images/self-contained2.jpg','../images/self-contained4.jpg'],
@@ -148,16 +145,16 @@
     // ---- Fallback Sample data ----
     const SAMPLE_DATA = [
       { id:1,  name:'Sunrise Lodge',    address:'Beside PAU Gate, Ibeju-Lekki',  rent:350000, room_type:'self-contain', distance_from_school:0.3, available:true,  landlord_id:1 },
-      { id:2,  name:'Grace Apartment',  address:'Abraham Adesanya Estate, Ajah',  rent:280000, room_type:'shared',       distance_from_school:0.8, available:true,  landlord_id:2 },
-      { id:3,  name:'Royal Chambers',   address:'Bogije, Ibeju-Lekki',            rent:480000, room_type:'flat',         distance_from_school:1.2, available:true,  landlord_id:1 },
+      { id:2,  name:'Grace Apartment',  address:'Abraham Adesanya Estate, Ajah',  rent:280000, room_type:'shared',        distance_from_school:0.8, available:true,  landlord_id:2 },
+      { id:3,  name:'Royal Chambers',   address:'Bogije, Ibeju-Lekki',            rent:480000, room_type:'flat',          distance_from_school:1.2, available:true,  landlord_id:1 },
       { id:4,  name:'Palm View Hostel', address:'Lakowe Estate',                   rent:220000, room_type:'single',       distance_from_school:2.0, available:true,  landlord_id:4 },
       { id:5,  name:'Lekki Gardens',    address:'Ibeju-Lekki Town',               rent:400000, room_type:'self-contain', distance_from_school:0.6, available:true,  landlord_id:3 },
-      { id:6,  name:'Blue Crest Rooms',  address:'Ajah, Lagos',                    rent:310000, room_type:'shared',       distance_from_school:1.5, available:false, landlord_id:6 },
-      { id:7,  name:'Harmony Court',    address:'Elerangbe, Ibeju-Lekki',         rent:450000, room_type:'flat',         distance_from_school:0.9, available:true,  landlord_id:5 },
+      { id:6,  name:'Blue Crest Rooms',  address:'Ajah, Lagos',                    rent:310000, room_type:'shared',        distance_from_school:1.5, available:false, landlord_id:6 },
+      { id:7,  name:'Harmony Court',    address:'Elerangbe, Ibeju-Lekki',         rent:450000, room_type:'flat',          distance_from_school:0.9, available:true,  landlord_id:5 },
       { id:8,  name:'Sunrise Court',    address:'Akodo, Ibeju-Lekki',             rent:260000, room_type:'single',       distance_from_school:1.8, available:true,  landlord_id:6 },
-      { id:9,  name:'Victoria Suites',  address:'Ibeju-Lekki',                    rent:520000, room_type:'flat',         distance_from_school:0.5, available:true,  landlord_id:3 },
-      { id:10, name:'Peace Haven',       address:'Bogije Road, Ibeju-Lekki',       rent:290000, room_type:'self-contain', distance_from_school:1.0, available:true,  landlord_id:2 },
-      { id:11, name:'Green Valley Rooms', address:'Lakowe-Akodo Road',              rent:200000, room_type:'single',       distance_from_school:2.5, available:true,  landlord_id:4 },
+      { id:9,  name:'Victoria Suites',  address:'Ibeju-Lekki',                    rent:520000, room_type:'flat',          distance_from_school:0.5, available:true,  landlord_id:3 },
+      { id:10, name:'Peace Haven',        address:'Bogije Road, Ibeju-Lekki',       rent:290000, room_type:'self-contain', distance_from_school:1.0, available:true,  landlord_id:2 },
+      { id:11, name:'Green Valley Rooms', address:'Lakowe-Akodo Road',               rent:200000, room_type:'single',       distance_from_school:2.5, available:true,  landlord_id:4 },
       { id:12, name:'Ambassador Lodge',   address:'Beside PAU Road, Ibeju-Lekki',  rent:380000, room_type:'self-contain', distance_from_school:0.4, available:true,  landlord_id:5 },
     ];
 
@@ -178,11 +175,11 @@
         if (name)    qp.append('name', name);
         if (type)    qp.append('room_type', type);
         if (maxRent) qp.append('max_rent', maxRent);
+        if (landlordIdParam) qp.append('landlord_id', landlordIdParam); // Pass landlord filtering to API if present
         
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 4000);
+        const timeout = setTimeout(() => controller.abort(), 6000); // 6s timeout to give Render's spin-up time a window
         
-        // Dynamically uses your real live URL instead of locking onto localhost
         const res = await fetch(`${BASE_URL}/api/properties?${qp}`, { signal: controller.signal });
         clearTimeout(timeout);
         data = await res.json();
@@ -191,7 +188,7 @@
         data = [...SAMPLE_DATA];
       }
 
-      // Filter by landlord if coming from landlord profile
+      // Client-side backup filter by landlord (in case endpoint handles it or falls back)
       if (landlordIdParam) {
         data = data.filter(p => String(p.landlord_id) === String(landlordIdParam));
       }
@@ -264,7 +261,6 @@
       document.getElementById('filterRent').value = 1000000;
       document.getElementById('filterRentDisplay').textContent = '₦1,000,000';
       document.getElementById('filterDist').value = '';
-      // Fixed flicker: directly run filters against backend rather than flashing old sample blocks
       applyFilters();
     }
 
