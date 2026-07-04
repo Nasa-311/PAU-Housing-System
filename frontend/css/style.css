@@ -909,7 +909,8 @@ body {
 }
 
 .auth-image-panel {
-  flex: 1;
+  flex: 0 0 38%;
+  max-width: 420px;
   position: relative;
   display: none;
   overflow: hidden;
@@ -958,18 +959,19 @@ body {
 }
 
 .auth-form-panel {
-  flex: 0 0 480px;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 32px;
+  padding: 40px 24px;
   background: var(--pau-light-bg);
   overflow-y: auto;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 460px;
   background: white;
   border-radius: var(--radius-lg);
   padding: 40px 36px;
@@ -994,6 +996,7 @@ body {
 /* Role tabs */
 .role-tabs {
   display: flex;
+  flex-wrap: nowrap;
   background: var(--pau-light-bg);
   border-radius: var(--radius-sm);
   padding: 4px;
@@ -1002,17 +1005,19 @@ body {
 }
 
 .role-tab {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   background: transparent;
   border: none;
-  padding: 10px 8px;
+  padding: 10px 6px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   font-family: 'DM Sans', sans-serif;
   color: var(--pau-gray);
   transition: var(--transition);
+  white-space: nowrap;
 }
 
 .role-tab.active {
