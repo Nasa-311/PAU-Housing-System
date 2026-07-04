@@ -82,14 +82,15 @@ try {
 async function sendSignupEmail(name, email, role) {
   if (!transporter) return;
   try {
+    const roleLabel = role === 'landlord' ? 'Property Owner' : role === 'agent' ? 'Agent' : 'Student';
     await transporter.sendMail({
       from:    `"PAU Housing" <${process.env.EMAIL_USER}>`,
       to:      process.env.EMAIL_TO || process.env.EMAIL_USER,
-      subject: `New ${role === 'landlord' ? 'Landlord' : 'Student'} Registration — PAU Housing`,
+      subject: `New ${roleLabel} Registration — PAU Housing`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:24px;
           background:#f4f6fb;border-radius:12px;">
-          <h2 style="color:#003087;font-family:Georgia,serif;">New ${role === 'landlord' ? 'Property Owner' : 'Student'} Registered</h2>
+          <h2 style="color:#003087;font-family:Georgia,serif;">New ${roleLabel} Registered</h2>
           <table style="width:100%;border-collapse:collapse;margin-top:16px;">
             <tr><td style="padding:8px;color:#6b7280;font-size:14px;">Name</td>
                 <td style="padding:8px;font-weight:600;color:#1a2340">${name}</td></tr>
@@ -131,6 +132,7 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'An account with this email already exists.' });
 
     let landlordId = null;
+    let agentId = null;
     if (role === 'landlord') {
       const lr = await pool.query(
         'INSERT INTO landlords (name, phone, email, address, bio) VALUES ($1,$2,$3,$4,$5) RETURNING id',
@@ -139,11 +141,19 @@ app.post('/api/register', async (req, res) => {
       landlordId = lr.rows[0].id;
     }
 
+    if (role === 'agent') {
+      const ar = await pool.query(
+        'INSERT INTO agents (name, phone, email, address, company_name, bio) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id',
+        [name, phone || '', email.trim(), address || 'Lagos', address || 'Independent Agent', 'Verified real estate agent near PAU campus.']
+      );
+      agentId = ar.rows[0].id;
+    }
+
     const result = await pool.query(
-      `INSERT INTO users (name, email, phone, password, role, landlord_id)
-       VALUES ($1,$2,$3,$4,$5,$6)
-       RETURNING id, name, email, role, landlord_id`,
-      [name, email.trim(), phone || '', password, role || 'student', landlordId]
+      `INSERT INTO users (name, email, phone, password, role, landlord_id, agent_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       RETURNING id, name, email, role, landlord_id, agent_id`,
+      [name, email.trim(), phone || '', password, role || 'student', landlordId, agentId]
     );
 
     // Send email notification
@@ -182,7 +192,8 @@ app.post('/api/login', async (req, res) => {
         email:       user.email,
         phone:       user.phone || '',
         role:        user.role,
-        landlord_id: user.landlord_id || null
+        landlord_id: user.landlord_id || null,
+        agent_id:    user.agent_id || null
       }
     });
   } catch (err) {

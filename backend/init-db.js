@@ -4,6 +4,17 @@ async function initializeDatabase() {
   const client = await pool.connect();
   try {
     await client.query(`
+      CREATE TABLE IF NOT EXISTS agents (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        email VARCHAR(255) UNIQUE NOT NULL,
+        address TEXT,
+        company_name VARCHAR(255),
+        bio TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       CREATE TABLE IF NOT EXISTS landlords (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -22,6 +33,7 @@ async function initializeDatabase() {
         password VARCHAR(255) NOT NULL,
         role VARCHAR(50) NOT NULL DEFAULT 'student',
         landlord_id INTEGER REFERENCES landlords(id) ON DELETE SET NULL,
+        agent_id INTEGER REFERENCES agents(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -47,6 +59,11 @@ async function initializeDatabase() {
         message TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS agent_id INTEGER REFERENCES agents(id) ON DELETE SET NULL;
     `);
 
     console.log('✅ Database schema ready');

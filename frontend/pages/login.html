@@ -60,6 +60,9 @@
           <button class="role-tab" id="tabLandlord" onclick="switchRole('landlord')">
             🏠 Owner Login
           </button>
+          <button class="role-tab" id="tabAgent" onclick="switchRole('agent')">
+            🧭 Agent Login
+          </button>
         </div>
 
         <div id="roleLabel" class="role-label">Signing in as a <strong>Student</strong></div>
@@ -119,10 +122,13 @@
     function switchRole(role) {
       document.getElementById('tabStudent').classList.toggle('active', role === 'student');
       document.getElementById('tabLandlord').classList.toggle('active', role === 'landlord');
+      document.getElementById('tabAgent').classList.toggle('active', role === 'agent');
       document.getElementById('roleLabel').innerHTML =
         role === 'student'
           ? 'Signing in as a <strong>Student</strong>'
-          : 'Signing in as a <strong>Property Owner</strong>';
+          : role === 'agent'
+            ? 'Signing in as an <strong>Agent</strong>'
+            : 'Signing in as a <strong>Property Owner</strong>';
       document.querySelector('.auth-switch a').href = `register.html?role=${role}`;
     }
 

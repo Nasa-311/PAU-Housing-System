@@ -60,6 +60,9 @@
           <button class="role-tab" id="tabLandlord" onclick="switchRole('landlord')">
             🏠 Owner Sign Up
           </button>
+          <button class="role-tab" id="tabAgent" onclick="switchRole('agent')">
+            🧭 Agent Sign Up
+          </button>
         </div>
 
         <div id="roleLabel" class="role-label">Registering as a <strong>Student</strong></div>
@@ -129,19 +132,23 @@
     const urlParams = new URLSearchParams(window.location.search);
     const preRole   = urlParams.get('role');
     if (preRole === 'landlord') switchRole('landlord');
+    else if (preRole === 'agent') switchRole('agent');
 
     function switchRole(role) {
       document.getElementById('userRole').value = role;
       document.getElementById('tabStudent').classList.toggle('active', role === 'student');
       document.getElementById('tabLandlord').classList.toggle('active', role === 'landlord');
+      document.getElementById('tabAgent').classList.toggle('active', role === 'agent');
       document.getElementById('roleLabel').innerHTML =
         role === 'student'
           ? 'Registering as a <strong>Student</strong>'
-          : 'Registering as a <strong>Property Owner</strong>';
+          : role === 'agent'
+            ? 'Registering as an <strong>Agent</strong>'
+            : 'Registering as a <strong>Property Owner</strong>';
       document.getElementById('addressGroup').style.display =
-        role === 'landlord' ? 'block' : 'none';
+        role === 'landlord' || role === 'agent' ? 'block' : 'none';
       document.getElementById('email').placeholder =
-        role === 'landlord' ? 'e.g. name@gmail.com' : 'e.g. name@pau.edu.ng';
+        role === 'landlord' ? 'e.g. name@gmail.com' : role === 'agent' ? 'e.g. name@agent.com' : 'e.g. name@pau.edu.ng';
     }
 
     const EYE_OPEN_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 5c-7.5 0-11 6.7-11 7s3.5 7 11 7 11-6.7 11-7-3.5-7-11-7zm0 12c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8.5c-1.9 0-3.5 1.6-3.5 3.5S10.1 15.5 12 15.5 15.5 13.9 15.5 12 13.9 8.5 12 8.5z"/><circle cx="12" cy="12" r="2"/></svg>';
