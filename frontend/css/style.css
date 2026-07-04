@@ -941,11 +941,9 @@ body {
 @media (min-width: 900px) { .auth-image-panel { display: block; } }
 
 .auth-image-panel img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: saturate(1.05);
+  /* hide the original side image to avoid a double image effect; use the
+     unified blurred full-viewport background instead */
+  display: none;
 }
 
 .auth-image-overlay {
