@@ -153,12 +153,12 @@
     const API = window.API_BASE || 'http://localhost:3000/api';
 
     const SAMPLE_LANDLORDS = [
-      { id:1, name:'Mr. Adebayo Johnson',  phone:'08012345678', email:'adebayo@example.com',  address:'Bogije, Ibeju-Lekki',      bio:'Experienced landlord with multiple properties near PAU. 24/7 security and constant water supply.',         properties_count:3, icon:'👨‍💼' },
-      { id:2, name:'Mrs. Chioma Okafor',   phone:'08098765432', email:'chioma@example.com',   address:'Abraham Adesanya Estate, Ajah', bio:'Friendly landlord providing affordable accommodation for PAU students. Kitchen and bathroom in every unit.',        properties_count:2, icon:'👩‍💼' },
-      { id:3, name:'Mr. Emeka Nwachukwu',  phone:'08056781234', email:'emeka@example.com',    address:'Lakowe Estate, Ibeju-Lekki',    bio:'Self-contain and flat options very close to PAU gate. Constant water supply and clean environment.',               properties_count:4, icon:'👨‍💼' },
-      { id:4, name:'Mrs. Folake Adeleke',  phone:'08134567890', email:'folake@example.com',   address:'Ibeju-Lekki Town',              bio:'Clean, secure and affordable rooms for PAU students. Flexible payment options. Generator backup available.',       properties_count:2, icon:'👩‍💼' },
-      { id:5, name:'Mr. Tunde Balogun',    phone:'08023456789', email:'tunde@example.com',    address:'Elerangbe, Ibeju-Lekki',        bio:'Modern apartments with good ventilation. 5 minutes drive from PAU campus. CCTV security cameras installed.',      properties_count:5, icon:'👨‍💼' },
-      { id:6, name:'Mrs. Ngozi Eze',       phone:'08145678901', email:'ngozi@example.com',    address:'Akodo, Ibeju-Lekki',            bio:'Affordable student accommodation near PAU main road. Generator backup, borehole water and secure gated compound.', properties_count:3, icon:'👩‍💼' },
+      { id:1, name:'Mr. Adebayo Johnson',  phone:'08012345678', email:'adebayo@example.com',  address:'Bogije, Ibeju-Lekki',      bio:'Experienced landlord with multiple properties near PAU. 24/7 security and constant water supply.',         properties_count:3, average_rating:4.5, ratings_count:8, icon:'👨‍💼' },
+      { id:2, name:'Mrs. Chioma Okafor',   phone:'08098765432', email:'chioma@example.com',   address:'Abraham Adesanya Estate, Ajah', bio:'Friendly landlord providing affordable accommodation for PAU students. Kitchen and bathroom in every unit.',        properties_count:2, average_rating:4.2, ratings_count:6, icon:'👩‍💼' },
+      { id:3, name:'Mr. Emeka Nwachukwu',  phone:'08056781234', email:'emeka@example.com',    address:'Lakowe Estate, Ibeju-Lekki',    bio:'Self-contain and flat options very close to PAU gate. Constant water supply and clean environment.',               properties_count:4, average_rating:4.6, ratings_count:5, icon:'👨‍💼' },
+      { id:4, name:'Mrs. Folake Adeleke',  phone:'08134567890', email:'folake@example.com',   address:'Ibeju-Lekki Town',              bio:'Clean, secure and affordable rooms for PAU students. Flexible payment options. Generator backup available.',       properties_count:2, average_rating:4.1, ratings_count:4, icon:'👩‍💼' },
+      { id:5, name:'Mr. Tunde Balogun',    phone:'08023456789', email:'tunde@example.com',    address:'Elerangbe, Ibeju-Lekki',        bio:'Modern apartments with good ventilation. 5 minutes drive from PAU campus. CCTV security cameras installed.',      properties_count:5, average_rating:4.3, ratings_count:7, icon:'👨‍💼' },
+      { id:6, name:'Mrs. Ngozi Eze',       phone:'08145678901', email:'ngozi@example.com',    address:'Akodo, Ibeju-Lekki',            bio:'Affordable student accommodation near PAU main road. Generator backup, borehole water and secure gated compound.', properties_count:3, average_rating:4.0, ratings_count:3, icon:'👩‍💼' },
     ];
 
     const ICONS = ['👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼','👨‍💼','👩‍💼'];
@@ -213,6 +213,7 @@
             <p class="landlord-bio">${(l.bio || 'Verified property owner near PAU campus.').substring(0, 90)}...</p>
             <div class="landlord-footer">
               <span class="landlord-props">🏠 ${l.properties_count || 0} Propert${Number(l.properties_count) === 1 ? 'y' : 'ies'}</span>
+              <span class="landlord-rating">⭐ ${Number(l.average_rating || 0).toFixed(1)}</span>
               <button class="btn-details">View Profile</button>
             </div>
           </div>
@@ -246,6 +247,8 @@
               <a href="register.html" style="color:var(--pau-blue);font-weight:600;">create a free account</a>.
            </div>`;
 
+      const ratingsHtml = await loadLandlordRatings(l.id, token && user ? user.id : null);
+
       const chatSectionHtml = token && user
         ? `<div class="chat-section">
              <h4 style="font-size:13px;font-weight:600;color:var(--pau-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">💬 Private Chatbox</h4>
@@ -262,6 +265,24 @@
         : '';
 
       const propsUrl  = `properties.html?landlord_id=${l.id}&landlord_name=${encodeURIComponent(l.name)}`;
+      const ratingFormHtml = token && user && user.role === 'student'
+        ? `
+          <div style="background:var(--pau-light-bg);border-radius:10px;padding:16px;margin-bottom:16px;text-align:left;">
+            <div style="font-size:13px;font-weight:600;color:var(--pau-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Rate this landlord</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+              <select id="ratingValue" style="padding:8px 10px;border:1px solid var(--pau-border);border-radius:8px;">
+                <option value="5">5 ★</option>
+                <option value="4">4 ★</option>
+                <option value="3">3 ★</option>
+                <option value="2">2 ★</option>
+                <option value="1">1 ★</option>
+              </select>
+              <button class="btn-primary" onclick="submitLandlordRating(${l.id}, ${user.id})" style="padding:10px 16px;">Submit</button>
+            </div>
+            <textarea id="ratingComment" rows="3" placeholder="Share your experience with this landlord..." style="width:100%;border:1px solid var(--pau-border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;"></textarea>
+          </div>
+        `
+        : '';
 
       document.getElementById('modalContent').innerHTML = `
         <div style="text-align:center;margin-bottom:24px;">
@@ -281,10 +302,17 @@
             <div style="font-size:12px;color:var(--pau-gray);">Properties Listed</div>
           </div>
           <div style="background:#eef2ff;border-radius:8px;padding:16px;text-align:center;">
-            <div style="font-size:26px;font-weight:700;color:var(--pau-blue);">✅</div>
-            <div style="font-size:12px;color:var(--pau-gray);">Verified</div>
+            <div style="font-size:26px;font-weight:700;color:var(--pau-blue);">${Number(l.average_rating || 0).toFixed(1)}★</div>
+            <div style="font-size:12px;color:var(--pau-gray);">Student Rating</div>
           </div>
         </div>
+
+        <div style="background:var(--pau-light-bg);border-radius:10px;padding:16px;margin-bottom:16px;text-align:left;">
+          <div style="font-size:13px;font-weight:600;color:var(--pau-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Student Reviews</div>
+          ${ratingsHtml}
+        </div>
+
+        ${ratingFormHtml}
 
         <div style="border-top:1px solid var(--pau-border);padding-top:20px;">
           <h4 style="font-size:13px;font-weight:600;color:var(--pau-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;text-align:left;">Contact Details</h4>
@@ -304,6 +332,31 @@
         fetchModalChatHistory(l.id, user.id);
         clearInterval(pollingInterval);
         pollingInterval = setInterval(() => fetchModalChatHistory(l.id, user.id, true), 3000);
+      }
+    }
+
+    async function loadLandlordRatings(landlordId, studentId) {
+      try {
+        const res = await fetch(`${API}/landlords/${landlordId}/ratings`);
+        if (!res.ok) return '<p style="font-size:13px;color:var(--pau-gray);">No reviews yet.</p>';
+        const data = await res.json();
+        const reviews = data.reviews || [];
+        if (!reviews.length) return '<p style="font-size:13px;color:var(--pau-gray);">No reviews yet.</p>';
+        const reviewHtml = reviews.slice(0, 3).map(r => `
+          <div style="border-top:1px solid var(--pau-border);padding-top:10px;margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <strong style="font-size:13px;">${r.student_name || 'Student'}</strong>
+              <span style="color:#f5a623;font-weight:700;">${'★'.repeat(Number(r.rating))}</span>
+            </div>
+            ${r.comment ? `<p style="font-size:13px;color:var(--pau-gray);margin-top:6px;">${r.comment}</p>` : ''}
+          </div>
+        `).join('');
+        return `
+          <div style="font-size:13px;color:var(--pau-gray);margin-bottom:8px;">Average ${Number(data.average_rating || 0).toFixed(1)} ★ from ${data.ratings_count || 0} review${Number(data.ratings_count) === 1 ? '' : 's'}</div>
+          ${reviewHtml}
+        `;
+      } catch {
+        return '<p style="font-size:13px;color:var(--pau-gray);">Reviews temporarily unavailable.</p>';
       }
     }
 
@@ -347,6 +400,27 @@
         if (!isBackground) {
           historyBox.innerHTML = `<p style="color:var(--pau-gray); font-size:11px; text-align:center; margin:auto 0;">Chat records temporarily offline.</p>`;
         }
+      }
+    }
+
+    async function submitLandlordRating(landlordId, studentId) {
+      const ratingValue = document.getElementById('ratingValue')?.value;
+      const comment = document.getElementById('ratingComment')?.value || '';
+      if (!studentId) return alert('Please sign in as a student to leave a rating.');
+      try {
+        const res = await fetch(`${API}/landlords/${landlordId}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: studentId, rating: Number(ratingValue), comment })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Unable to save rating.');
+        localStorage.setItem('pau_landlord_rating_update', String(Date.now()));
+        alert('✅ Your rating has been saved.');
+        loadLandlords();
+        openLandlord(landlordId);
+      } catch (err) {
+        alert(err.message);
       }
     }
 

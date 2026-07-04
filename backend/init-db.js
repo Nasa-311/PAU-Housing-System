@@ -25,6 +25,16 @@ async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS landlord_ratings (
+        id SERIAL PRIMARY KEY,
+        landlord_id INTEGER REFERENCES landlords(id) ON DELETE CASCADE,
+        student_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (landlord_id, student_id)
+      );
+
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,

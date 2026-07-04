@@ -701,7 +701,7 @@ body {
    ============================================================ */
 .two-col-section {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   max-width: 1100px;
 }
@@ -768,6 +768,66 @@ body {
   font-family: 'DM Sans', sans-serif;
   transition: var(--transition);
   text-decoration: none;
+}
+
+/* Agent dashboard */
+.agent-hero-banner {
+  background: linear-gradient(135deg, #0f4c81 0%, #1f6fb2 100%);
+  padding: 28px 32px;
+  border-radius: 20px;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.agent-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.agent-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  border: 1px solid var(--pau-border);
+}
+
+.agent-card h3 { margin: 0 0 8px; font-size: 18px; }
+.agent-card p { margin: 0; color: var(--pau-gray); line-height: 1.6; }
+
+.agent-list {
+  display: grid;
+  gap: 12px;
+}
+
+.agent-item {
+  background: white;
+  border: 1px solid var(--pau-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.dark-mode .agent-card,
+.dark-mode .agent-item {
+  background: #1c2236;
+  border-color: #263050;
 }
 
 .btn-primary:hover { background: var(--pau-blue-light); transform: translateY(-1px); }

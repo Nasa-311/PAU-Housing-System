@@ -245,8 +245,16 @@
       document.getElementById('userName').textContent   = user.name;
       document.getElementById('settingName').textContent  = user.name;
       document.getElementById('settingEmail').textContent = user.email;
-      document.getElementById('settingRole').textContent  = user.role === 'landlord' ? '🏠 Property Owner' : '🎓 Student';
-      document.getElementById('dashLink').href = user.role === 'landlord' ? 'owner-dashboard.html' : 'student-dashboard.html';
+      document.getElementById('settingRole').textContent  = user.role === 'landlord'
+        ? '🏠 Property Owner'
+        : user.role === 'agent'
+          ? '🧭 Agent'
+          : '🎓 Student';
+      document.getElementById('dashLink').href = user.role === 'landlord'
+        ? 'owner-dashboard.html'
+        : user.role === 'agent'
+          ? 'agent-dashboard.html'
+          : 'student-dashboard.html';
     }
 
     // Sync button states on load

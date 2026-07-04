@@ -81,7 +81,11 @@ function updateNavbar() {
     const pathPrefix = isIndexPage ? 'frontend/pages/' : '';
 
     // 5. Add dynamic dashboard link
-    const dashUrl = user.role === 'landlord' ? 'owner-dashboard.html' : 'student-dashboard.html';
+    const dashUrl = user.role === 'landlord'
+      ? 'owner-dashboard.html'
+      : user.role === 'agent'
+        ? 'agent-dashboard.html'
+        : 'student-dashboard.html';
     const dashLi  = document.createElement('li');
     dashLi.className = 'nav-user-item';
     dashLi.innerHTML = `<a href="${pathPrefix}${dashUrl}" class="btn-nav">👤 ${user.name.split(' ')[0]}</a>`;
@@ -121,8 +125,15 @@ async function loadStats() {
     const lands = await l.json();
     const ce = document.getElementById('countProperties');
     const le = document.getElementById('countLandlords');
+    const re = document.getElementById('avgRating');
     if (ce) ce.textContent = props.length;
     if (le) le.textContent = lands.length;
+    if (re) {
+      const avg = lands.length
+        ? lands.reduce((sum, item) => sum + Number(item.average_rating || 0), 0) / lands.length
+        : 0;
+      re.textContent = `${avg.toFixed(1)}★`;
+    }
   } catch (e) {}
 }
 

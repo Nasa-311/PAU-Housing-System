@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agent Dashboard — PAU Housing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="../js/accessibility.js"></script>
+  <script src="../js/toast.js"></script>
+</head>
+<body class="dashboard-body">
+  <aside class="sidebar" id="sidebar">
+    <img src="../images/logo2.png" alt="PAU Housing Logo" class="nav-logo-img" style="height: 80px; width: auto; vertical-align: middle; margin-right: 10px;">
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" onclick="showAgentTab('overview', this)"><span class="sidebar-icon">📊</span> Overview</a>
+      <a href="#" class="sidebar-link" onclick="showAgentTab('leads', this)"><span class="sidebar-icon">🤝</span> Leads</a>
+      <a href="#" class="sidebar-link" onclick="showAgentTab('properties', this)"><span class="sidebar-icon">🏠</span> Suggested Properties</a>
+      <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+    </nav>
+    <button class="sidebar-logout" onclick="logout()">🚪 Logout</button>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dash-topbar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="dash-user-info">
+        <div class="dash-avatar owner-avatar" id="userAvatar">AG</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--pau-text)" id="userName">Agent</div>
+          <div style="font-size:11px;color:#1f6fb2;font-weight:700">🧭 Agent Dashboard</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="agent-hero-banner">
+      <div class="agent-badge">🧭 Agent Portal</div>
+      <h1 style="margin:0 0 8px; font-family:'Playfair Display', serif; font-size: 28px;" id="welcomeName">Welcome back</h1>
+      <p style="margin:0; color: rgba(255,255,255,0.86);">Help students find homes, follow up on enquiries, and track your activity.</p>
+    </div>
+
+    <section id="tab-overview">
+      <div class="agent-grid">
+        <div class="agent-card">
+          <h3>Today’s Activity</h3>
+          <p>Track your latest student enquiries and property recommendations from one place.</p>
+        </div>
+        <div class="agent-card">
+          <h3>Response Rate</h3>
+          <p>Stay responsive so students can move quickly when they find a suitable place.</p>
+        </div>
+        <div class="agent-card">
+          <h3>Available Listings</h3>
+          <p>Browse the latest verified properties near PAU and share the best matches.</p>
+        </div>
+      </div>
+
+      <div class="dash-section-header">
+        <h1>Recommended Properties</h1>
+        <p>Suggested homes for your clients based on the latest listings.</p>
+      </div>
+      <div class="agent-list" id="agentProperties"></div>
+    </section>
+
+    <section id="tab-leads" style="display:none;">
+      <div class="dash-section-header">
+        <h1>Client Leads</h1>
+        <p>Student inquiries and follow-up tasks will appear here.</p>
+      </div>
+      <div class="agent-list">
+        <div class="agent-item"><div><strong>No leads yet</strong><div style="font-size: 13px; color: var(--pau-gray);">New enquiries will be shown here once students contact you.</div></div></div>
+      </div>
+    </section>
+
+    <section id="tab-properties" style="display:none;">
+      <div class="dash-section-header">
+        <h1>Suggested Properties</h1>
+        <p>Use these verified listings to help students shortlist homes.</p>
+      </div>
+      <div class="agent-list" id="agentSuggestedProperties"></div>
+    </section>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script>
+    function logout() {
+      localStorage.removeItem('pau_token');
+      localStorage.removeItem('pau_user');
+      window.location.href = '../../index.html';
+    }
+
+    function showAgentTab(tab, el) {
+      document.querySelectorAll('main section[id^="tab-"]').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).style.display = 'block';
+      if (el) el.classList.add('active');
+    }
+
+    async function loadAgentProperties() {
+      const container = document.getElementById('agentProperties');
+      const suggested = document.getElementById('agentSuggestedProperties');
+      try {
+        const res = await fetch(`${API_BASE}/properties?limit=6`);
+        const data = await res.json();
+        const html = data.slice(0, 4).map(item => `
+          <div class="agent-item">
+            <div>
+              <strong>${item.name}</strong>
+              <div style="font-size: 13px; color: var(--pau-gray);">${item.address} • ₦${Number(item.rent).toLocaleString()} / year</div>
+            </div>
+            <a class="btn-primary" href="property-detail.html?id=${item.id}">View</a>
+          </div>
+        `).join('');
+        container.innerHTML = html;
+        suggested.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = '<div class="agent-item"><div><strong>Unable to load properties right now.</strong></div></div>';
+        suggested.innerHTML = container.innerHTML;
+      }
+    }
+
+    function populateUser() {
+      const user = JSON.parse(localStorage.getItem('pau_user') || 'null');
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      document.getElementById('userName').textContent = user.name || 'Agent';
+      document.getElementById('userAvatar').textContent = (user.name || 'AG').split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('welcomeName').textContent = `Welcome back, ${user.name.split(' ')[0]}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateUser();
+      loadAgentProperties();
+    });
+  </script>
+</body>
+</html>

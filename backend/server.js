@@ -281,9 +281,13 @@ app.get('/api/my-properties', async (req, res) => {
 app.get('/api/landlords', async (req, res) => {
   try {
     const r = await pool.query(
-      `SELECT l.*, COUNT(p.id)::int AS properties_count
+      `SELECT l.*,
+              COUNT(DISTINCT p.id)::int AS properties_count,
+              COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) AS average_rating,
+              COUNT(r.id)::int AS ratings_count
        FROM landlords l
        LEFT JOIN properties p ON p.landlord_id = l.id
+       LEFT JOIN landlord_ratings r ON r.landlord_id = l.id
        GROUP BY l.id
        ORDER BY l.created_at DESC`
     );
@@ -296,8 +300,62 @@ app.get('/api/landlords/:id', async (req, res) => {
     const l = await pool.query('SELECT * FROM landlords WHERE id=$1', [req.params.id]);
     const p = await pool.query('SELECT * FROM properties WHERE landlord_id=$1', [req.params.id]);
     if (!l.rows.length) return res.status(404).json({ error: 'Not found' });
-    res.json({ ...l.rows[0], properties: p.rows });
+    const ratingSummary = await pool.query(
+      `SELECT COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average_rating,
+              COUNT(*)::int AS ratings_count
+       FROM landlord_ratings WHERE landlord_id=$1`,
+      [req.params.id]
+    );
+    res.json({ ...l.rows[0], properties: p.rows, average_rating: Number(ratingSummary.rows[0].average_rating || 0), ratings_count: Number(ratingSummary.rows[0].ratings_count || 0) });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/landlords/:id/ratings', async (req, res) => {
+  try {
+    const summary = await pool.query(
+      `SELECT COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average_rating,
+              COUNT(*)::int AS ratings_count
+       FROM landlord_ratings WHERE landlord_id=$1`,
+      [req.params.id]
+    );
+    const reviews = await pool.query(
+      `SELECT r.*, u.name AS student_name
+       FROM landlord_ratings r
+       LEFT JOIN users u ON u.id = r.student_id
+       WHERE r.landlord_id=$1
+       ORDER BY r.created_at DESC`,
+      [req.params.id]
+    );
+    res.json({ average_rating: Number(summary.rows[0].average_rating || 0), ratings_count: Number(summary.rows[0].ratings_count || 0), reviews: reviews.rows });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/landlords/:id/rate', async (req, res) => {
+  const { student_id, rating, comment } = req.body;
+  const landlordId = Number(req.params.id);
+
+  if (!student_id || !Number.isInteger(Number(rating)) || Number(rating) < 1 || Number(rating) > 5) {
+    return res.status(400).json({ error: 'A valid student id and rating between 1 and 5 are required.' });
+  }
+
+  try {
+    const landlord = await pool.query('SELECT id FROM landlords WHERE id=$1', [landlordId]);
+    if (!landlord.rows.length) return res.status(404).json({ error: 'Landlord not found.' });
+
+    const result = await pool.query(
+      `INSERT INTO landlord_ratings (landlord_id, student_id, rating, comment)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (landlord_id, student_id)
+       DO UPDATE SET rating = EXCLUDED.rating, comment = EXCLUDED.comment, created_at = CURRENT_TIMESTAMP
+       RETURNING *`,
+      [landlordId, Number(student_id), Number(rating), comment || '']
+    );
+
+    res.status(201).json({ message: 'Thank you for your feedback.', review: result.rows[0] });
+  } catch (err) {
+    console.error('Rate landlord error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ==========================================

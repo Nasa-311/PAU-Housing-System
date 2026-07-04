@@ -199,6 +199,8 @@
           setTimeout(() => {
             if (data.user.role === 'landlord') {
               window.location.href = 'owner-dashboard.html';
+            } else if (data.user.role === 'agent') {
+              window.location.href = 'agent-dashboard.html';
             } else {
               window.location.href = '../../index.html';
             }
@@ -224,6 +226,8 @@
           setTimeout(() => {
             if (found.role === 'landlord') {
               window.location.href = 'owner-dashboard.html';
+            } else if (found.role === 'agent') {
+              window.location.href = 'agent-dashboard.html';
             } else {
               window.location.href = '../../index.html';
             }
